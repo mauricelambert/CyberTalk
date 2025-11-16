@@ -68,7 +68,7 @@ python3 server.py
 
 ## Step 1: web site analysis
 
-1. Open web browser on the (company website)[http://sylphora-dynamics.test:8080/] and navigate on the website to get information about the company
+1. Open web browser on the [company website](http://sylphora-dynamics.test:8080/) and navigate on the website to get information about the company
 2. Run `Cr0wl3r --do-not-download --recursive http://sylphora-dynamics.test:8080/`
 3. Analysis:
     - the only one and most dynamic page: `/login.html` (`python3 arsenal/dynamics_printer.py`)
