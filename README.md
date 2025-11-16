@@ -319,6 +319,7 @@ Enregistrer les résultats dans un fichier ? (o/N):
 
  - Use Single Sign-On (SSO) to limit the number of passwords employees need to remember.
  - Limit mandatory password changes, but enforce strong password policies to maintain security.
+ - Create an email rule to move all messages from your internal domain to a specific folder, so spoofed emails from look-alike domains are easier to spot.
 
 ## Bonus
 
@@ -338,6 +339,10 @@ Enregistrer les résultats dans un fichier ? (o/N):
 
  - [MaliciousPDF](https://github.com/mauricelambert/MaliciousPDF)
  - XLL/WLL
+
+#### Malicious execution
+
+ - Download from URL
 
 #### Technical attacks
 
