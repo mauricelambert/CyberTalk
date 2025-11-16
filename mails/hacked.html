@@ -1,0 +1,389 @@
+<!doctype html>
+<!--
+  Copyright (C) 2025 MauriceLambert
+
+  CyberAttackSimulation for CyberTalk
+
+  CyberAttackSimulation is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  CyberAttackSimulation is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with CyberAttackSimulation.  If not, see <https://www.gnu.org/licenses/>.
+-->
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Démo : Page "hackée"</title>
+<style>
+  :root {
+    --red: #ff0033;
+    --dark: #050507;
+    --green: #00ff88;
+  }
+  body {
+    margin: 0;
+    font-family: Inter, system-ui, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    background: linear-gradient(180deg,#081018 0%, #0b1220 100%);
+    color: #e6eef8;
+    overflow: hidden;
+    height: 100vh;
+  }
+
+  main {
+    padding: 32px;
+  }
+
+  .demo-box {
+    max-width: 900px;
+    margin: 40px auto;
+    padding: 24px;
+    background: rgba(255,255,255,0.02);
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.03);
+  }
+
+  .control {
+    position: fixed;
+    left: 20px;
+    top: 20px;
+    z-index: 20000;
+  }
+  .control button {
+    background: linear-gradient(90deg,#222,#111);
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.06);
+    padding: 10px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+  }
+
+  #hacked-overlay {
+    position: fixed;
+    inset: 0;
+    display: none;
+    z-index: 10000;
+    pointer-events: none;
+  }
+  #hacked-overlay.active {
+    display: block;
+    pointer-events: auto;
+  }
+
+  .flash {
+    position:absolute;
+    inset:0;
+    background: linear-gradient(120deg, rgba(255,0,51,0.06), rgba(255,20,20,0.12));
+    mix-blend-mode: screen;
+    animation: flashAnim 1.2s infinite;
+    z-index: 10005;
+  }
+  @keyframes flashAnim {
+    0% { opacity: 0.05; }
+    50% { opacity: 0.35; transform: scale(1.01); }
+    100% { opacity: 0.05; }
+  }
+
+  .hacked-text {
+    position: absolute;
+    top: 12%;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: clamp(36px, 9vw, 140px);
+    color: rgba(255,20,30,0.95);
+    font-weight: 900;
+    letter-spacing: 8px;
+    text-shadow:
+      0 0 8px rgba(255,0,51,0.6),
+      0 0 32px rgba(255,0,51,0.2),
+      0 0 80px rgba(255,0,51,0.12);
+    z-index:10010;
+    mix-blend-mode: screen;
+    transform-origin: center;
+    animation: wobble 3s ease-in-out infinite;
+  }
+  @keyframes wobble {
+    0% { transform: translateX(-50%) rotate(-1deg) scale(1); }
+    50% { transform: translateX(-50%) rotate(1deg) scale(1.02); }
+    100% { transform: translateX(-50%) rotate(-1deg) scale(1); }
+  }
+
+  .fake-console {
+    position: fixed;
+    left: 20px;
+    bottom: 20px;
+    width: 480px;
+    max-width: calc(100% - 40px);
+    background: rgba(0,0,0,0.72);
+    border-radius: 8px;
+    padding: 12px;
+    z-index: 10020;
+    color: #9dfab0;
+    font-family: "Source Code Pro", monospace;
+    font-size: 13px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+    border: 1px solid rgba(255,255,255,0.03);
+    overflow: auto;
+    max-height: 40vh;
+  }
+  .fake-console .line { white-space: pre-wrap; margin-bottom: 6px; opacity: 0.95; }
+
+  .ransom {
+    position: fixed;
+    right: 30px;
+    top: 25%;
+    width: 380px;
+    background: linear-gradient(180deg, rgba(10,0,0,0.6), rgba(40,0,0,0.4));
+    border: 2px dashed rgba(255,80,80,0.18);
+    color: #fff;
+    padding: 18px;
+    border-radius: 12px;
+    z-index: 10030;
+    font-family: sans-serif;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.7);
+  }
+  .ransom h3 { margin: 0 0 8px 0; color: var(--red); font-size: 18px; }
+  .ransom p { margin: 0; opacity: 0.9; font-size: 14px; }
+
+  #matrix {
+    position: absolute;
+    inset: 0;
+    z-index: 10000;
+    pointer-events: none;
+  }
+
+  .close-hack {
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    z-index: 10050;
+  }
+  .close-hack button {
+    background: #111;
+    color: #fff;
+    border-radius: 999px;
+    padding: 10px 14px;
+    border: 1px solid rgba(255,255,255,0.04);
+    cursor: pointer;
+  }
+</style>
+</head>
+<body>
+  <div class="control">
+    <button style="display: none;" id="startBtn">Démarrer la démo "hack"</button>
+  </div>
+
+  <main>
+    <div class="demo-box">
+    </div>
+  </main>
+
+  <div id="hacked-overlay" aria-hidden="true">
+    <canvas id="matrix"></canvas>
+    <div class="flash"></div>
+
+    <div class="hacked-text" id="hackedText">HACKED</div>
+
+    <div class="ransom" id="ransomBox" style="display:none;">
+      <h3>Accès compromis</h3>
+      <p id="ransomMsg">Vos fichiers ont été consultés. Ceci est une démonstration — aucune donnée n'a été copiée.</p>
+    </div>
+
+    <div class="fake-console" id="fakeConsole" style="display:none;"></div>
+
+    <div class="close-hack" style="display:none;">
+      <button style="display: none;" id="stopBtn">Arrêter la démo</button>
+    </div> 
+  </div>
+
+<script>
+const startBtn = document.getElementById('startBtn');
+const stopBtn = null;
+const overlay = document.getElementById('hacked-overlay');
+const matrixCanvas = document.getElementById('matrix');
+const hackedText = document.getElementById('hackedText');
+const ransomBox = document.getElementById('ransomBox');
+const fakeConsole = document.getElementById('fakeConsole');
+
+let matrixCtx, matrixW, matrixH, matrixInterval;
+let audioCtx, oscillator;
+let consoleInterval, logIndex = 0;
+let blinkAnim;
+
+const fakeLogs = [
+  "[system] connection established: 10.0.0.2:443",
+  "[auth] user: admin — password: ********",
+  "[db] dumping table users...",
+  "[exfil] packaging 42 files into archive",
+  "[exfil] transfer paused — waiting for key",
+  "[root] persistence achieved.",
+  "[malware] lucky.dll injected.",
+  "[system] clearing traces...",
+  "[notice] Browser was successfully hacked."
+];
+
+function playBeep(freq=220, duration=0.08) {
+  try {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const o = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    o.type = "sine";
+    o.frequency.value = freq;
+    g.gain.value = 0.02;
+    o.connect(g); g.connect(audioCtx.destination);
+    o.start();
+    setTimeout(()=>{ o.stop(); }, duration*1000);
+  } catch(e) {
+  }
+}
+
+function startMatrix() {
+  matrixCanvas.width = window.innerWidth;
+  matrixCanvas.height = window.innerHeight;
+  matrixW = matrixCanvas.width;
+  matrixH = matrixCanvas.height;
+  matrixCtx = matrixCanvas.getContext('2d');
+
+  const fontSize = 16;
+  const columns = Math.floor(matrixW / fontSize);
+  const drops = Array(columns).fill(1);
+  const characters = "01あいうえおアイウエオ漢字ABCDEFG0123456789!@#€%^&*";
+
+  matrixCtx.font = fontSize + "px monospace";
+
+  matrixInterval = setInterval(() => {
+    matrixCtx.fillStyle = "rgba(0,0,0,0.15)";
+    matrixCtx.fillRect(0, 0, matrixW, matrixH);
+
+    matrixCtx.fillStyle = "rgba(0,255,136,0.9)";
+    matrixCtx.shadowColor = "rgba(0,255,150,0.2)";
+    matrixCtx.shadowBlur = 10;
+
+    for (let i = 0; i < drops.length; i++) {
+      const text = characters.charAt(Math.floor(Math.random() * characters.length));
+      matrixCtx.fillText(text, i * fontSize, drops[i] * fontSize);
+      if (drops[i] * fontSize > matrixH && Math.random() > 0.975) {
+        drops[i] = 0;
+      }
+      drops[i]++;
+    }
+  }, 45);
+}
+
+function stopMatrix() {
+  clearInterval(matrixInterval);
+  matrixCtx && matrixCtx.clearRect(0,0,matrixW,matrixH);
+}
+
+function startConsoleLogs() {
+  fakeConsole.innerHTML = "";
+  fakeConsole.style.display = "block";
+  logIndex = 0;
+  consoleInterval = setInterval(() => {
+    if (logIndex < fakeLogs.length) {
+      const div = document.createElement('div');
+      div.className = 'line';
+      div.textContent = fakeLogs[logIndex++];
+      fakeConsole.appendChild(div);
+      fakeConsole.scrollTop = fakeConsole.scrollHeight;
+      playBeep(220 + Math.random()*600, 0.06);
+    } else {
+      const v = "[echo] heartbeat " + new Date().toLocaleTimeString();
+      const d = document.createElement('div');
+      d.className = 'line';
+      d.textContent = v;
+      fakeConsole.appendChild(d);
+      if (fakeConsole.childNodes.length > 80) fakeConsole.removeChild(fakeConsole.firstChild);
+      fakeConsole.scrollTop = fakeConsole.scrollHeight;
+      playBeep(110 + Math.random()*400, 0.04);
+    }
+  }, 700);
+}
+
+function stopConsoleLogs() {
+  clearInterval(consoleInterval);
+  fakeConsole.style.display = "none";
+}
+
+function showRansomText() {
+  ransomBox.style.display = "block";
+  const p = document.getElementById('ransomMsg');
+  const full = "Vos fichiers ont été consultés et exfiltrés par l'attaquant vous êtes compromis ! Envoyez 1 BitCoin sur le wallet: 3LU8wRu4ZnXP4UM8Yo6kkTiGHM9BubgyiG.";
+  p.textContent = "";
+  let i = 0;
+  const ti = setInterval(() => {
+    p.textContent += full.charAt(i++);
+    if (i >= full.length) clearInterval(ti);
+  }, 28);
+}
+
+function makeScary() {
+  overlay.classList.add('active');
+  document.body.style.overflow = 'hidden';
+
+  hackedText.style.animation = "wobble 2.6s infinite";
+  hackedText.textContent = "HACKED";
+
+  document.querySelector('.flash').style.display = 'block';
+  document.querySelector('.close-hack').style.display = 'block';
+
+  startMatrix();
+  startConsoleLogs();
+  showRansomText();
+
+  let pulses = 0;
+  blinkAnim = setInterval(() => {
+    playBeep(200 + pulses*80, 0.06);
+    hackedText.style.transform = `translateX(-50%) scale(${1 + Math.sin(pulses*0.6)*0.02}) rotate(${Math.sin(pulses*0.8)*1}deg)`;
+    pulses++;
+    if (pulses > 30) clearInterval(blinkAnim);
+  }, 120);
+}
+
+function stopScary() {
+  overlay.classList.remove('active');
+  document.body.style.overflow = '';
+  stopMatrix();
+  stopConsoleLogs();
+  ransomBox.style.display = 'none';
+  document.querySelector('.close-hack').style.display = 'none';
+  document.querySelector('.flash').style.display = 'none';
+  clearInterval(blinkAnim);
+  if (audioCtx) {
+    try { audioCtx.close(); } catch(e){}
+    audioCtx = null;
+  }
+}
+
+startBtn.addEventListener('click', () => {
+  makeScary();
+  const closeWrap = document.querySelector('.close-hack');
+  // closeWrap.style.display = 'block';
+  if (!document.getElementById('stopBtn')) {
+    const stop = document.createElement('button');
+    stop.id = 'stopBtn';
+    stop.textContent = 'Arrêter la démo';
+    closeWrap.appendChild(stop);
+    stop.addEventListener('click', stopScary);
+  }
+});
+
+window.addEventListener('resize', () => {
+  if (overlay.classList.contains('active')) {
+    stopMatrix();
+    startMatrix();
+  }
+});
+
+startBtn.click();
+</script>
+</body>
+</html>

@@ -1,0 +1,172 @@
+<!doctype html>
+<!--
+  Copyright (C) 2025 MauriceLambert
+
+  CyberAttackSimulation for CyberTalk
+
+  CyberAttackSimulation is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  CyberAttackSimulation is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with CyberAttackSimulation.  If not, see <https://www.gnu.org/licenses/>.
+-->
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Erreur de Sécurité — Sylphora Dynamics</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: "Arial", sans-serif;
+      background: #111;
+      color: #f44336;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .background-shape {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 0;
+      height: 0;
+      background: radial-gradient(circle, rgba(255, 87, 56, 0.8) 0%, rgba(255, 87, 56, 0) 70%);
+      border-radius: 50%;
+      animation: expand 4s ease-in-out infinite;
+      z-index: -1;
+    }
+
+    .container {
+      background: #2c2c2c;
+      padding: 40px;
+      border-radius: 12px;
+      text-align: center;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
+      position: relative;
+      animation: fadeIn 1s ease-out;
+    }
+
+    h1 {
+      font-size: 3rem;
+      color: #f44336;
+      margin-bottom: 20px;
+      animation: shake 0.5s ease-out;
+    }
+
+    p {
+      font-size: 1.25rem;
+      color: #eaeaea;
+      margin-bottom: 15px;
+      opacity: 0;
+      animation: fadeInText 1.5s forwards;
+    }
+
+    .note {
+      font-size: 1.1rem;
+      font-weight: bold;
+      margin-top: 25px;
+      color: #ffd600;
+      opacity: 0;
+      animation: fadeInText 1.8s forwards;
+    }
+
+    .action {
+      margin-top: 20px;
+      font-size: 1.2rem;
+      color: #ff5722;
+      opacity: 0;
+      animation: fadeInText 2s forwards;
+    }
+
+    .action a {
+      color: #ff5722;
+      text-decoration: none;
+      border-bottom: 2px solid #ff5722;
+      transition: all 0.3s ease-in-out;
+    }
+
+    .action a:hover {
+      color: #ffffff;
+      background-color: #ff5722;
+      padding: 3px 6px;
+      border-radius: 4px;
+      transform: scale(1.1);
+    }
+
+    @keyframes shake {
+      0% { transform: translateX(0); }
+      25% { transform: translateX(-5px); }
+      50% { transform: translateX(5px); }
+      75% { transform: translateX(-5px); }
+      100% { transform: translateX(0); }
+    }
+
+    @keyframes expand {
+      0% {
+        width: 0;
+        height: 0;
+        opacity: 0.2;
+      }
+      50% {
+        width: 80%;
+        height: 80%;
+        opacity: 0.5;
+      }
+      100% {
+        width: 0;
+        height: 0;
+        opacity: 0.2;
+      }
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+
+    @keyframes fadeInText {
+      0% {
+        opacity: 0;
+      }
+      100% {
+        opacity: 1;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="background-shape"></div>
+
+  <div class="container">
+    <h1>Accès Interdit</h1>
+    <p><strong>Erreur de Sécurité</strong></p>
+    <p><strong>Votre adresse IP n'est pas autorisée à accéder à cette page.</strong></p>
+    <p>Pour toute question ou demande d'assistance, veuillez contacter notre support technique.</p>
+    <div class="note">
+      <p>Nous avons détecté un accès suspect à notre système. Si vous pensez qu'il s'agit d'une erreur, veuillez contacter notre équipe.</p>
+    </div>
+    <div class="action">
+      <a href="/">Retour à la page d'accueil</a>
+    </div>
+  </div>
+</body>
+</html>
+

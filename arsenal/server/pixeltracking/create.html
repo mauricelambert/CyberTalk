@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<!--
+  Copyright (C) 2025 MauriceLambert
+
+  CyberAttackSimulation for CyberTalk
+
+  CyberAttackSimulation is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  CyberAttackSimulation is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with CyberAttackSimulation.  If not, see <https://www.gnu.org/licenses/>.
+-->
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Créer un lien</title>
+<style>
+body { font-family: Arial, sans-serif; background: #f5f6fa; margin: 40px; color: #333; }
+.container { max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 8px;
+             box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
+h1 { text-align: center; color: #2f3640; }
+textarea { width: 100%; height: 100px; padding: 8px; margin-bottom: 15px; font-size: 1em; box-sizing: border-box; }
+button { background: #273c75; color: white; padding: 10px 20px; border: none; cursor: pointer; font-size: 1em; border-radius: 4px; }
+button:hover { background: #40739e; }
+form { display: flex; flex-direction: column; align-items: center; }
+#result { margin-top: 20px; text-align: center; font-weight: bold; }
+.btn { display: inline-block; padding: 10px 20px; background: #273c75; color: white; text-decoration: none; border-radius: 4px; font-weight: bold; cursor: pointer; }
+.btn:hover { background: #40739e; }
+.link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>🔗 Créer un nouveau lien</h1>
+  <a class='link' href="/stats" style="display:block; text-align:center; margin-bottom:15px; color:#273c75; text-decoration:none;">
+    Voir les statistiques 📊
+  </a>
+  
+  <form id="create-form" style="display:flex; gap:10px; justify-content:center;">
+    <textarea id="data" placeholder="Saisissez la donnée associée..."></textarea>
+    <div style="display:flex; gap:10px;">
+      <button type="submit">Créer le lien</button>
+      <a href="/stats" class="btn">Voir les statistiques 📊</a>
+    </div>
+  </form>
+
+  <div id="result"></div>
+</div>
+<script>
+document.getElementById('create-form').addEventListener('submit', async e => {
+    e.preventDefault();
+    const dataValue = document.getElementById('data').value.trim();
+    if (!dataValue) return alert('Veuillez saisir une donnée.');
+    const res = await fetch('/api/create_link', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ data: dataValue })
+    });
+    const json = await res.json();
+    document.getElementById('result').innerHTML = 
+        json.link ? `<p>Lien créé :</p><a href="${json.link}" target="_blank">${json.link}</a>`
+                  : `<p>Erreur : ${json.error || 'Inconnue'}</p>`;
+});
+</script>
+</body>
+</html>

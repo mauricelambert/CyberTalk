@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<!--
+  Copyright (C) 2025 MauriceLambert
+
+  CyberAttackSimulation for CyberTalk
+
+  CyberAttackSimulation is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  CyberAttackSimulation is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with CyberAttackSimulation.  If not, see <https://www.gnu.org/licenses/>.
+-->
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Statistiques des liens</title>
+<style>
+body { font-family: Arial, sans-serif; background: #f5f6fa; margin: 40px; color: #333; }
+h1 { text-align: center; color: #2f3640; }
+.controls { text-align: center; margin-bottom: 15px; }
+input, button { padding: 6px 10px; margin: 5px; border: 1px solid #ccc; border-radius: 4px; font-size: 0.95em; }
+button { background: #273c75; color: white; cursor: pointer; }
+button:hover { background: #40739e; }
+table { border-collapse: collapse; width: 100%; background: white; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
+th, td { padding: 10px; border-bottom: 1px solid #ddd; text-align: left; }
+th { background: #273c75; color: white; cursor: pointer; }
+tr:hover { background: #f1f2f6; }
+.container { max-width: 1000px; margin: auto; }
+.btn { display: inline-block; margin-left: 10px; padding: 6px 12px; background: #273c75; color: white; text-decoration: none; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 0.95em; border: none; }
+.btn:hover { background: #40739e; }
+</style>
+</head>
+<body>
+<div class="container">
+<h1>📊 Statistiques des liens</h1>
+
+<div class="controls">
+  <input type="text" id="filter" placeholder="Filtrer par texte...">
+  <button id="sortBtn">Trier par compteur 🔽</button>
+  <button id="toggleZeroBtn">Masquer compteurs = 0 🚫</button>
+  <a href="/create" class="btn">Créer un lien ➕</a>
+</div>
+
+<table id="stats-table">
+  <thead>
+    <tr>
+      <th data-key="id">ID</th>
+      <th data-key="data">Donnée</th>
+      <th data-key="count">Compteur</th>
+      <th data-key="created_at">Créé le</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+</div>
+
+<script>
+let allData = [];
+let sortOrder = 'desc';
+let showZero = true;
+
+async function loadData() {
+    const res = await fetch('/api/results');
+    allData = await res.json();
+    displayData();
+}
+
+function displayData() {
+    const tbody = document.querySelector('#stats-table tbody');
+    tbody.innerHTML = '';
+    const filter = document.getElementById('filter').value.toLowerCase();
+
+    let filtered = allData.filter(row =>
+        Object.values(row).some(v => v.toLowerCase().includes(filter))
+    );
+
+    if (!showZero) {
+        filtered = filtered.filter(row => parseInt(row.count) > 0);
+    }
+
+    filtered.sort((a, b) => {
+        const va = parseInt(a.count);
+        const vb = parseInt(b.count);
+        return sortOrder === 'asc' ? va - vb : vb - va;
+    });
+
+    filtered.forEach(row => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${row.id}</td><td>${row.data}</td><td>${row.count}</td><td>${row.created_at}</td>`;
+        tbody.appendChild(tr);
+    });
+}
+
+document.getElementById('filter').addEventListener('input', displayData);
+
+document.getElementById('sortBtn').addEventListener('click', () => {
+    sortOrder = sortOrder === 'asc' ? 'desc' : 'asc';
+    document.getElementById('sortBtn').textContent = 
+        sortOrder === 'asc' ? 'Trier par compteur 🔼' : 'Trier par compteur 🔽';
+    displayData();
+});
+
+document.getElementById('toggleZeroBtn').addEventListener('click', () => {
+    showZero = !showZero;
+    document.getElementById('toggleZeroBtn').textContent = 
+        showZero ? 'Masquer compteurs = 0 🚫' : 'Afficher compteurs = 0 ✅';
+    displayData();
+});
+
+document.querySelectorAll('th').forEach(th => {
+    th.addEventListener('click', () => {
+        const key = th.dataset.key;
+        allData.sort((a, b) => (a[key] > b[key] ? 1 : -1));
+        displayData();
+    });
+});
+
+loadData();
+setInterval(loadData, 5000);
+</script>
+</body>
+</html>

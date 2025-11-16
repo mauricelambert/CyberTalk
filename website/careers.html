@@ -1,0 +1,93 @@
+<!doctype html>
+<!--
+  Copyright (C) 2025 MauriceLambert
+
+  CyberAttackSimulation for CyberTalk
+
+  CyberAttackSimulation is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  CyberAttackSimulation is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with CyberAttackSimulation.  If not, see <https://www.gnu.org/licenses/>.
+-->
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Carrières — Sylphora Dynamics</title>
+  <meta name="description" content="Offres d'emploi — Sylphora Dynamics" />
+  <style>
+    :root{--bg:#f7fbff; --card:#ffffff; --muted:#50627a; --accent:#236bb2; --radius:12px; --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", "Courier New", monospace;}
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial;background:linear-gradient(180deg,#f3f8ff,#ffffff); color:#0d2233; padding:26px;}
+    .wrap{max-width:980px;margin:0 auto}
+    header{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+    .logo{width:56px;height:56px;border-radius:12px;background:linear-gradient(135deg,#2b6cb0,#2db0ff);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700}
+    h1{margin:0;font-size:1.4rem}
+    .subtitle{color:var(--muted);margin-top:6px}
+
+    .grid{display:grid;grid-template-columns:1fr 320px;gap:20px}
+    @media (max-width:900px){.grid{grid-template-columns:1fr}}
+    .card{background:var(--card); padding:18px;border-radius:var(--radius);box-shadow: 0 6px 18px rgba(12,32,48,0.06);border:1px solid rgba(15,36,55,0.04)}
+    .job{display:flex;justify-content:space-between;align-items:center;padding:12px;border-radius:10px;background:linear-gradient(180deg,#fbfdff,#f7fbff);margin-bottom:10px}
+    .job h3{margin:0;font-size:1rem}
+    .meta{font-family:var(--mono);color:var(--muted);font-size:0.9rem}
+
+    a.btn{background:var(--accent);color:#fff;padding:8px 12px;border-radius:8px;text-decoration:none;font-weight:600}
+    .hint{font-size:0.9rem;color:var(--muted)}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="logo">SD</div>
+      <div>
+        <h1>Carrières — Sylphora Dynamics</h1>
+        <div class="subtitle">Orchestrer le flux, sans effort</div>
+      </div>
+    </header>
+
+    <main class="grid">
+      <section class="card">
+        <h2 style="margin-top:0">Postes ouverts</h2>
+
+        <article class="job" aria-labelledby="job1">
+          <div>
+            <h3 id="job1">Ingénieur DevOps</h3>
+            <div class="meta">Réf: <strong>SLY-2025-OPS-01</strong> · Lyon</div>
+          </div>
+          <div><a class="btn" href="/assets/cv_mathilde_rousseau.pdf" download>Fiche de poste</a></div>
+        </article>
+
+        <article class="job" aria-labelledby="job2">
+          <div>
+            <h3 id="job2">Lead Product Security</h3>
+            <div class="meta">Réf: <strong>SLY-2025-SEC-02</strong> · Remote</div>
+          </div>
+          <div><a class="btn" href="/assets/cv_lucas_fayet.pdf" download>Fiche de poste</a></div>
+        </article>
+
+        <section style="margin-top:14px">
+          <h3>Processus</h3>
+          <p class="hint">Téléchargez les fiches de postes.</p>
+        </section>
+      </section>
+
+      <aside class="card">
+        <h3 style="margin-top:0">Contact RH</h3>
+        <p class="hint">Email RH: <code>hr@sylphora-dynamics.test</code></p>
+        <p class="hint">Email Bertille Demoulin: <code>bertille.demoulin@sylphora-dynamics.test</code></p>
+      </aside>
+    </main>
+
+    <footer style="margin-top:20px;color:var(--muted)">© Sylphora Dynamics</footer>
+  </div>
+</body>
+</html>
