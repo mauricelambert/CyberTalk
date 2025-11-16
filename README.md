@@ -229,7 +229,7 @@ Request count: 5217
 ## Step 5: guess credentials
 
 1. Develop a custom tool to generate personal wordlist or find a tool on internet
-2. Check hash algorithm with beconfirm requests through a different communication channel (phone, instant message, etc.) and never respond to or use the contact information provided in the suspicious email.rtille credentials -> sha256
+2. Check hash algorithm with bertille credentials -> sha256
 2. Generate custom wordlist for `george.fayet@sylphora-dynamics.test`, `henri.brosquet@sylphora-dynamics.test`, `mathilde.rousseau@sylphora-dynamics.test` and compare with hash
 3. We got george password
 
