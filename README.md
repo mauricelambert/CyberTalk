@@ -37,7 +37,7 @@ In the *host* file (`/etc/hosts`, `C:\Windows\System32\drivers\etc\hosts`):
 
 ### Browser
 
-In your browser: accept to open popup from `mailbox.fr`.
+In your browser: accept to open popup from `mailbox.fr` (firefox: `about:preferences#privacy` -> `Permissions` -> `popups` -> `Exceptions` -> `http://mailbox.fr:8080^firstPartyDomain=mailbox.fr`).
 
 ### Initialize
 
@@ -45,6 +45,10 @@ In your browser: accept to open popup from `mailbox.fr`.
 python3 website/bdd.py
 python3 arsenal\malicious_lnk.py
 powershell -ExecutionPolicy Bypass arsenal\USB\hook_iwr.ps1
+```
+
+```powershell
+Set-ItemProperty -Path HKCU:\Console -Name VirtualTerminalLevel -Value 1 -Type DWord
 ```
 
 ## Introduction
@@ -68,8 +72,8 @@ python3 server.py
 
 ## Step 1: web site analysis
 
-1. Open web browser on the [company website](http://sylphora-dynamics.test:8080/) and navigate on the website to get information about the company
-2. Run `Cr0wl3r --do-not-download --recursive http://sylphora-dynamics.test:8080/`
+1. Open web browser on the [company website](http://sylphora-dynamics.test:8080/welcome.html) and navigate on the website to get information about the company
+2. Run `Cr0wl3r --do-not-download --recursive http://sylphora-dynamics.test:8080/welcome.html`
 3. Analysis:
     - the only one and most dynamic page: `/login.html` (`python3 arsenal/dynamics_printer.py`)
     - 2 emails addresses: `bertille.demoulin@sylphora-dynamics.test` (RH) and `henri.brosquet@sylphora-dynamics.test` (CEO)
@@ -256,14 +260,14 @@ Enregistrer les résultats dans un fichier ? (o/N):
 
 ## Step6: leaks
 
-1. Checks for data leak and password reuse for `henri.brosquet@sylphora-dynamics.test` and `mathilde.rousseau@sylphora-dynamics.test`.
+1. Checks for data leak on [data.breach.onion](http://data.breach.onion:8080/search.html) and password reuse for `henri.brosquet@sylphora-dynamics.test` and `mathilde.rousseau@sylphora-dynamics.test`.
 2. We got the `gmail` password for `mathilde.rousseau@gmail.com`: `V3RyStr0ngP4$$w0rdF0rGmail`
 3. Guess the password for `mathilde.rousseau@sylphora-dynamics.test`: `V3RyStr0ngP4$$w0rdF0rSylphora`
 
 ## Step 7: phishing with password stealer
 
 1. We want `henri.brosquet@sylphora-dynamics.test` credentials so we can target *Henri Brosquet*
-2. Send a phishing email with a malicious URL
+2. Send a phishing email with a malicious URL, read mail on [mailbox.fr](http://mailbox.fr:8080/mailbox.html)
 3. Fake PDF deploy a malware on Windows
 4. Steal keepass credentials
 
