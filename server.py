@@ -188,7 +188,7 @@ class CyberAttackSimulationServer(BaseHTTPRequestHandler):
         
     def serve_page(self, page, code: int = 200, message: str = None, **kwargs):
         try:
-            with open(page, 'r') as file:
+            with open(page, 'r', encoding="utf-8") as file:
                 content = Template(file.read()).safe_substitute(kwargs).encode()
                 self.send_response(code, message=message)
                 self.send_header('Content-Type', 'text/html')
@@ -210,12 +210,14 @@ class CyberAttackSimulationServer(BaseHTTPRequestHandler):
             self.serve_page(join(PATH_MAIL, self.path[1:]))
         elif self.path == '/search.html':                                                                        # Data breach, Host: data.breach.onion
             self.serve_page(join(PATH_DATABREACH, 'search_data_leak.html'))
-        elif self.path == '/lnk':                                                                                # Malware download, Host: a.c2
+        elif self.path == '/procedure_urgence_securite.pdf.lnk':                                                 # Malware download, Host: a.c2
             self.serve_binary(join(PATH_ARSENAL, '..', 'procedure_urgence_securite.pdf.lnk'))
+        elif self.path == '/procedure_urgence_securite.zip':                                                     # Malware download, Host: a.c2
+            self.serve_binary(join(PATH_ARSENAL, '..', 'procedure_urgence_securite.zip'))
         elif self.path == '/py':                                                                                 # Malware download, Host: a.c2
             self.serve_binary(join(PATH_ARSENAL, '..', 'malware.py'))
-        elif self.path == '/.a.pdf':                                                                             # Malware download, Host: a.c2
-            self.serve_binary(join(PATH_MAIL, '.procedure_urgence_securite.pdf'))
+        elif self.path == '/procedure_urgence_securite.pdf':                                                     # Malware download, Host: a.c2
+            self.serve_binary(join(PATH_MAIL, 'procedure_urgence_securite.pdf'))
         elif self.path == '/welcome.html' or self.path == '/contact.html' or self.path == '/careers.html':       # company website, Host: sylphora-dynamics.test
             self.serve_page(join(PATH_WEBSITE, self.path[1:]))
         elif self.path == '/login.html':                                                                         # company website, Host: sylphora-dynamics.test
@@ -233,7 +235,7 @@ class CyberAttackSimulationServer(BaseHTTPRequestHandler):
         elif self.path.startswith("/csv/list/"):                                                                 # CSV viewer, Host: csv.attackers.c2
             self.list_csv_files()
         elif self.path.startswith("/csv/view/"):                                                                 # CSV viewer, Host: csv.attackers.c2
-            self.csv_viewer(unquote(self.path[8:]))
+            self.csv_viewer(unquote(self.path[10:]))
         else:
             self.page_404()
 
@@ -395,7 +397,7 @@ class CyberAttackSimulationServer(BaseHTTPRequestHandler):
         <tr><th>IP</th><th>Filename</th><th>Date/Time</th></tr>
         """
         for u in sorted(CSV_FILES, key=lambda x: x["datetime"], reverse=True):
-            html += f"<tr><td>{u['ip']}</td><td><a href='/view/{u['filename']}'>{u['filename']}</a></td><td>{u['datetime']}</td></tr>"
+            html += f"<tr><td>{u['ip']}</td><td><a href='/csv/view/{u['filename']}'>{u['filename']}</a></td><td>{u['datetime']}</td></tr>"
         html += "</table></body></html>"
         self._send_html(html)
         
@@ -417,19 +419,19 @@ class CyberAttackSimulationServer(BaseHTTPRequestHandler):
         <h1>📊 {filename}</h1>
         <table>
         """
-        with open(filepath, newline='', encoding='utf-8') as f:
-            reader = reader(f)
-            for i, row in enumerate(reader):
+        with open(filepath, newline='', encoding='utf-8') as file:
+            csvfile = reader(file)
+            for i, row in enumerate(csvfile):
                 html += "<tr>" + "".join(
                     f"<th>{cell}</th>" if i == 0 else f"<td>{cell}</td>"
                     for cell in row
                 ) + "</tr>"
-        html += "</table><p><a href='/'>← Back to list</a></p></body></html>"
+        html += "</table><p><a href='/csv/list/'>← Back to list</a></p></body></html>"
         self._send_html(html)
         
     def upload_csv(self, original_name):
         data = self.read_request_body()
-        final_name = save_pixel_tracking_database(original_name)
+        final_name = get_csv_filename(original_name)
         filepath = join(CSV_FILES_PATH, final_name)
 
         with open(filepath, "wb") as file:

