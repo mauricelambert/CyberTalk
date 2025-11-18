@@ -35,6 +35,24 @@ In the *host* file (`/etc/hosts`, `C:\Windows\System32\drivers\etc\hosts`):
 127.0.0.1 data.breach.onion
 ```
 
+### Defender (administrator permissions required)
+
+> This step is not required when I write the presentation, but it should be detected by EPP in the future. You need to disable it to ensure that your demonstration works.
+>> The PowerShell command using `iex(iwr ...)` is now detected as a **ClickFix attack** when performing the BadUSB attack. You can fix this by disabling *real time protection* oor by modifying the payload (starting `ransom.ps1` directly from PowerShell is not detected).
+
+```powershell
+Set-MPPreference -DisableTamperProtection $true
+Set-MpPreference -DisableRealtimeMonitoring $true
+```
+
+If don't have permissions to disable the *Tamper Protection* with administrator permissions, you may disable it from graphical interface:
+
+1. Open the *Windows Security* app by clicking on the Start menu and typing *Windows Security*. Select *Windows Security* to open it.
+2. In the *Windows Security* app, click on the *Virus & threat protection* tab.
+3. Under the *Virus & threat protection settings*, click on *Manage settings*.
+4. Scroll down to the *Tamper Protection* section and toggle the switch to enable it.
+5. Turn off *Real-time protection*.
+
 ### Browser
 
 In your browser: accept to open popup from `mailbox.fr` (firefox: `about:preferences#privacy` -> `Permissions` -> `popups` -> `Exceptions` -> `http://mailbox.fr:8080^firstPartyDomain=mailbox.fr`).
