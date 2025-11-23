@@ -19,7 +19,7 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 ###################
 
-from http.server import BaseHTTPRequestHandler, HTTPServer
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer, HTTPServer
 from os.path import join, dirname, exists, splitext
 from csv import DictWriter, DictReader, reader
 from urllib.parse import parse_qs, unquote
@@ -461,7 +461,7 @@ def main() -> int:
             CSV_FILES.extend(load(file))
 
     CyberAttackSimulationServer.PAGES_404["pixeltracking.attackers.c2"] = CyberAttackSimulationServer.json_page_404
-    run()
+    run(ThreadingHTTPServer)
     return 0
 
 if __name__ == '__main__':
