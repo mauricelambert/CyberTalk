@@ -32,6 +32,7 @@ In the *host* file (`/etc/hosts`, `C:\Windows\System32\drivers\etc\hosts`):
 127.0.0.1 attackers.c2
 127.0.0.1 pixeltracking.attackers.c2
 127.0.0.1 csv.attackers.c2
+127.0.0.1 breach.onion
 127.0.0.1 data.breach.onion
 ```
 
@@ -41,7 +42,7 @@ In the *host* file (`/etc/hosts`, `C:\Windows\System32\drivers\etc\hosts`):
 >> The PowerShell command using `iex(iwr ...)` is now detected as a **ClickFix attack** when performing the BadUSB attack. You can fix this by disabling *real time protection* oor by modifying the payload (starting `ransom.ps1` directly from PowerShell is not detected).
 
 ```powershell
-Set-MPPreference -DisableTamperProtection $true
+Set-ExecutionPolicy RemoteSigned
 Set-MpPreference -DisableRealtimeMonitoring $true
 ```
 
@@ -56,6 +57,8 @@ If don't have permissions to disable the *Tamper Protection* with administrator 
 ### Browser
 
 In your browser: accept to open popup from `mailbox.fr` (firefox: `about:preferences#privacy` -> `Permissions` -> `popups` -> `Exceptions` -> `http://mailbox.fr:8080^firstPartyDomain=mailbox.fr`).
+
+In firefox: `about:config` -> `network.dns.blockDotOnion` -> `false`
 
 ### Initialize
 
@@ -126,7 +129,7 @@ under certain conditions.
 ## Step 2: Bruteforce
 
 1. Download a french password wordlist: `wget https://raw.githubusercontent.com/tarraschk/richelieu/refs/heads/master/french_passwords_top5000.txt -O french_passwords.txt`
-2. Run the bruteforce script: `python3 bruteforce.py`
+2. Run the bruteforce script: `python3 arsenal/bruteforce.py`
 3. Credentials found for `bertille.demoulin@sylphora-dynamics.test`
 4. OPTIONAL: we can try an authentication with the valid credentials, we get a new prompt for a 2FA
 
