@@ -81,7 +81,7 @@ Set-ItemProperty -Path HKCU:\Console -Name VirtualTerminalLevel -Value 1 -Type D
 ## Start the scenario
 
 ```bash
-python3 server.py
+run.bat
 ```
 
 ## Scenario
